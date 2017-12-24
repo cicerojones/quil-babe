@@ -1,0 +1,821 @@
+*  Oh, do ~:reload~ my friends
+** first passes
+*** deal with namespaces
+  :PROPERTIES:
+  :ID:       BD6805C4-0991-4002-98FD-E0AF86528FA2
+  :END:
+#+begin_src clojure :results silent :show-process t
+(use :reload 'quilbabel.core)
+#+end_src
+
+#+begin_src clojure :results silent :show-process t
+(use :reload 'quilbabel.dynamic)
+#+end_src
+
+#+begin_src clojure :show-process t
+(in-ns 'quilbabel.dynamic)
+#+end_src
+*** versions of draw
+**** Version currently in core:
+
+Colored "rim" and greyscaled "center"
+
+#+begin_src clojure :show-process t
+(defn draw []
+  (q/stroke (q/random 255) (q/random 255) (q/random 255))
+  (q/fill (q/random 255))
+  (let [diam (q/random 100)
+        x    (q/random (q/width))
+        y    (q/random (q/height))]
+    (q/ellipse x y diam diam)))
+#+end_src
+
+#+begin_src clojure :show-process t
+(in-ns 'quilbabel.dynamic)
+#+end_src
+
+#+RESULTS:
+: #namespace[quilbabel.dynamic]
+
+#+begin_src clojure :show-process t
+*ns*
+#+end_src
+
+#+RESULTS:
+: #namespace[quilbabel.dynamic]
+
+Without changing namespace in the REPL!!
+: #namespace[quilbabel.core]
+
+
+Must eval the namespace change in the REPL?
+**** Black and white version with "proper" ellipses
+#+begin_src clojure :show-process t
+  (defn draw []
+    (q/stroke (q/random 255))
+    (q/stroke-weight (q/random 10))
+    (q/fill (q/random 255))
+    (let [diam (q/random 100)
+	  x    (q/random (q/width))
+	  y    (q/random (q/height))]
+      (q/ellipse x y (* 2 diam) diam)))
+#+end_src
+
+#+RESULTS:
+: #'quilbabel.dynamic/draw
+
+
+Now, you need not even reload!! Just eval the block
+**** Color version:
+#+begin_src clojure :show-process t
+  (defn draw []
+    (q/stroke (q/random 255) (q/random 255) (q/random 255))
+    (q/stroke-weight (q/random 10))
+    (q/fill (q/random 255))
+
+    (let [diam (q/random 100)
+	  x (q/random (q/width))
+	  y (q/random (q/height))]
+      (q/ellipse x y diam diam)))
+
+#+end_src
+
+#+RESULTS:
+: #'quilbabel.dynamic/draw
+
+** quil-sketches.mouse
+*** original as one block (~quil-sketches.mouse~ namespace)
+#+begin_src clojure :show-process t
+(ns quil-sketches.mouse
+  (:require [quil.core :refer :all]))
+
+(defn setup []
+  (smooth)
+  (no-stroke)
+  (set-state! :mouse-position (atom [0 0])))
+
+(defn draw
+  []
+  (background-float 125)
+  (stroke-weight 20)
+  (stroke-float 10)
+  (let [[x y] @(state :mouse-position)]
+    (point x y)))
+
+(defn mouse-moved []
+  (let [x (mouse-x)  y (mouse-y)]
+    (reset! (state :mouse-position) [x y])))
+
+(defsketch mouse-example
+  :title "Mouse example."
+  :size [200 200]
+  :setup setup
+  :draw draw
+  :mouse-moved mouse-moved)
+
+(defn -main [& args])
+#+end_src
+
+*** use tangling to dynamically add code to project?
+Here is the code copied straight from the quil-examples into a babel block
+
+Note that I use a tangle argument to create this file in the src directory of this project
+
+This is just to make sure I can get the basic thing working before moving on to a dynamic workflow.
+#+begin_src clojure :show-process t :tangle "src/quilbabel/mousebabel.clj"
+(ns quilbabel.mousebabel
+  (:require [quil.core :refer :all]))
+
+(defn setup []
+  (smooth)
+  (no-stroke)
+  (set-state! :mouse-position (atom [0 0])))
+
+(defn draw
+  []
+  (background-float 125)
+  (stroke-weight 20)
+  (stroke-float 10)
+  (let [[x y] @(state :mouse-position)]
+    (point x y)))
+
+(defn mouse-moved []
+  (let [x (mouse-x)  y (mouse-y)]
+    (reset! (state :mouse-position) [x y])))
+
+(defsketch mouse-example
+  :title "Mouse example."
+  :size [200 200]
+  :setup setup
+  :draw draw
+  :mouse-moved mouse-moved)
+
+;; (defn -main [& args])
+
+#+end_src
+
+Will reload sketch the whole, original version of the sketch
+#+begin_src clojure :results silent :show-process t
+(use :reload 'quilbabel.mousebabel)
+#+end_src
+*** break up namespace
+Now get ready to tangle two files, one for the core defsketch and one for the setup and draw, so that you can use the latter to dynamically reload the changes from babel
+**** core
+#+begin_src clojure :show-process t :tangle "src/quilbabel/mousebabelcore.clj"
+(ns quilbabel.mousebabel
+(:require [quil.core :refer :all])
+(:require [quilbabel.mousebabeldynamic :as dynamic]))
+
+(defsketch mouse-example
+  :title "Mouse example."
+  :size [200 200]
+  :setup dynamic/setup
+  :draw dynamic/draw
+  :mouse-moved dynamic/mouse-moved)
+
+#+end_src
+**** dynamic
+#+begin_src clojure :show-process t :tangle "src/quilbabel/mousebabeldynamic.clj"
+(ns quilbabel.mousebabeldynamic
+  (:require [quil.core :refer :all]))
+
+(defn setup []
+  (smooth)
+  (no-stroke)
+  (set-state! :mouse-position (atom [0 0])))
+
+(defn draw
+  []
+  (background-float 125)
+  (stroke-weight 20)
+  (stroke-float 10)
+  (let [[x y] @(state :mouse-position)]
+    (point x y)))
+
+(defn mouse-moved []
+  (let [x (mouse-x)  y (mouse-y)]
+    (reset! (state :mouse-position) [x y])))
+#+end_src
+**** reload
+#+begin_src clojure :show-process t
+(use :reload 'quilbabel.mousebabelcore)
+#+end_src
+
+#+RESULTS:
+: nil
+**** Use the ~in-ns~ command in the REPL
+#+BEGIN_SRC clojure :show-process t
+
+(in-ns 'quilbabel.mousebabeldynamic)
+#+END_SRC
+
+Check that the change took hold here in babel-land.
+#+begin_src clojure :show-process t
+*ns*
+#+end_src
+
+#+RESULTS:
+: #namespace[quilbabel.mousebabeldynamic]
+**** Change the draw function 
+#+begin_src clojure :show-process t
+(defn draw
+  []
+  (background-float 125)
+  (stroke-weight 2)
+  (stroke-float 10)
+  (let [[x y] @(state :mouse-position)]
+    (point x y)))
+#+end_src
+
+#+RESULTS:
+: #'quilbabel.mousebabeldynamic/draw
+
+** functional mode using babel
+*** original as one block
+
+Use the repl to call "use" the "namespace/file" you create here:
+
+(DON'T FORGET TO CHANGE THE NAMESPACE TO MATCH THE FILE!
+#+begin_src clojure :show-process t :tangle "src/quilbabel/funbabel.clj"
+(ns quilbabel.funbabel
+  (:require [quil.core :as q]
+            [quil.middleware :as m]))
+
+(def min-r 10)
+
+(defn setup []
+  ; initial state
+  {:x 0 :y 0 :r min-r
+   }
+  )
+
+(defn my-update [state]
+  ; increase radius of the circle by 1 on each frame
+  (update-in state [:r] inc))
+
+(defn draw [state]
+  (q/background 255)
+  (q/ellipse (:x state) (:y state) (:r state) (:r state)))
+
+; decrease radius by 1 but keeping it not less than min-r
+(defn shrink [r]
+  (max min-r (dec r)))
+
+(defn mouse-moved [state event]
+  (-> state
+      ; set circle position to mouse position
+      (assoc :x (:x event) :y (:y event))
+      ; decrease radius
+      (update-in [:r] shrink)))
+
+(q/defsketch fun-mode-example
+  :size [200 200]
+  :setup setup
+  :draw draw
+  :update my-update
+  :mouse-moved mouse-moved
+  :middleware [m/fun-mode])
+
+#+end_src
+
+Can I dynamically
+#+begin_src clojure :show-process t :results silent
+(def min-r 30)
+#+end_src
+
+#+begin_src clojure :show-process t
+*ns*
+#+end_src
+
+#+RESULTS:
+: #namespace[quilbabel.dynamic]
+
+#+begin_src clojure :show-process t
+(use :reload 'quilbabel.funbabel)
+#+end_src
+
+#+RESULTS:
+: nil
+* changing frame rates dynamically?
+
+Will run the sketch ~quil-example~ in quilbabel/src/quilbabel/core.clj
+#+begin_src clojure :results silent :show-process t
+(use :reload 'quilbabel.core)
+#+end_src
+
+Now, copy this to the REPL in order to get define functions that use the "dynamic" namespace
+#+begin_src clojure :show-process t
+(in-ns 'quilbabel.dynamic)
+#+end_src
+
+But, no matter how much you want to change the frame-rate from setup, it appears that this is already done
+#+begin_src clojure :show-process t
+(defn setup []
+  (q/frame-rate 10))
+#+end_src
+
+#+RESULTS:
+: #'quilbabel.dynamic/setup
+* use anonymous functions in defsketch for quick experiments
+  :PROPERTIES:
+  :ID:       828D0FC4-0291-4FE4-B457-CF3DD7864E27
+  :END:
+** concentrate circles in the top corner
+#+begin_src clojure :show-process t
+  (q/defsketch ellipses-with-fn-literals1
+    :setup #(q/frame-rate 10)
+    :draw #(q/ellipse (q/random 100) (q/random 100) 10 10)
+	       )
+#+end_src
+
+#+RESULTS:
+: #'quilbabel.core/allone
+** use a ~do~ block to run two different drawings concurrent
+#+begin_src clojure :show-process t
+  (q/defsketch ellipses-with-fn-literals2
+    :setup #(q/frame-rate 30)
+    :draw #(do (q/ellipse (q/random 100) (q/random 100) 10 10)
+	       ;; (Thread/sleep 3000)
+	       (q/ellipse (q/random 100 300) (q/random 100 300) 10 10)
+  ))
+
+#+end_src
+
+#+RESULTS:
+: #'quilbabel.dynamic/allthree
+** draw single pixel circles next to 10 pixel circles
+#+begin_src clojure :show-process t
+  (q/defsketch ellipses-with-fn-literals3
+    :setup #(q/frame-rate 30)
+    :draw #(do (q/ellipse (q/random 100) (q/random 100) (q/random 1 3) (q/random 1 3))
+	       ;; (Thread/sleep 3000)
+	       (q/ellipse (q/random 100 300) (q/random 100 300) 10 10)
+  ))
+
+#+end_src
+
+#+RESULTS:
+: #'quilbabel.dynamic/allthree
+** nest anonymous functions, but not function literals (esp. without arguments!)
+#+begin_src clojure :show-process t
+*ns*
+#+end_src
+
+#+RESULTS:
+: #namespace[quilbabel.core]
+
+#+begin_src clojure :show-process t
+(q/defsketch drawcircles-with-fun-mode
+:size[480 120]
+:setup (fn [] {:x 0, :y 0, :r 10})
+:draw #(q/ellipse (:x %) (:y %) (:r %) (:r %))
+:update #(update-in % [:r] inc)
+:mouse-moved (fn [m e] (-> m (assoc :x (:x e) :y (:y e)) (update-in [:r] #(max 10 (dec %)))))
+:middleware [m/fun-mode])
+#+end_src
+
+#+RESULTS:
+: #'quilbabel.core/drawcircles
+
+FAILS
+#+begin_src clojure :show-process t
+;; fails because no "draw"?
+(q/defsketch diagonals
+:size [480 120]
+:setup (fn [] (do (q/stroke-weight 8) (for [n (range 20 400 60)] (q/line n 40 (+ n 60) 80))))
+)
+#+end_src
+
+#+RESULTS:
+: #'quilbabel.core/diagonals
+
+#+begin_src clojure :show-process t
+;; succeeds!
+(q/defsketch diagonals1
+:size [480 120]
+:setup #(q/stroke-weight 8)
+:draw #(q/line 10 40 (+ 10 60) 80)
+)
+#+end_src
+
+#+RESULTS:
+: #'quilbabel.core/diagonals1
+
+** use dorun
+FAILS
+#+begin_src clojure :show-process t
+;; fails because lazy-seq ~for~
+(q/defsketch diagonals
+:size [480 120]
+:setup #(q/stroke-weight 8)
+:draw #(for [n (range 20 400 60)] (q/line n 40 (+ n 60) 80))
+)
+#+end_src
+
+#+RESULTS:
+: #'quilbabel.core/diagonals
+
+#+begin_src clojure :show-process t
+;; succeeds with DORUN
+(q/defsketch diagonals2
+:size [480 120]
+:setup #(dorun (for [n (range 20 400 60)] (q/line n 40 (+ n 60) 80)))
+)
+#+end_src
+#+RESULTS:
+: #'quilbabel.core/diagonals2
+
+#+begin_src clojure :show-process t
+;; succeeds with DORUN
+(q/defsketch diagonals3
+:size [480 120]
+:setup #(do (q/stroke-weight 8) (dorun (for [n (range 20 400 60)] (q/line n 40 (+ n 60) 80))))
+)
+#+end_src
+
+** use setup with ~random~ values
+#+RESULTS:
+: #'quilbabel.core/diagonals3
+#+begin_src clojure :show-process t
+;; stroke-weight set just once
+(q/defsketch diagonals3
+:size [480 120]
+:setup #(do (q/stroke-weight (rand-int 8)) (dorun (for [n (range 20 400 60)] (q/line n 40 (+ n 60) 80))))
+)
+#+end_src
+
+#+RESULTS:
+: #'quilbabel.core/diagonals3
+
+#+begin_src clojure
+;; captures same stroke-weight 
+(q/defsketch diagonals3
+:size [480 120]
+:draw #(dorun (for [n (range 20 400 60)] (do (q/stroke-weight (rand-int 34)) (q/line n 40 (+ n 60) 80))))
+)
+#+end_src
+
+#+RESULTS:
+: #'quilbabel.dynamic/diagonals3
+
+#+begin_src clojure
+;; use overtone function
+;; when used with ~:draw~ runs through all rand n?
+  (q/defsketch diagonals3
+    :size [480 120]
+    :draw #(let [x (overtone.algo.chance/weighted-choose [1 20 40 90] [0.5 0.3 0.125 0.075])]
+	    (do (q/stroke-weight (rand-int x))
+		(q/line 10 40 (+ 10 50) 80))))
+#+end_src
+
+#+RESULTS:
+: #'quilbabel.dynamic/diagonals3
+
+
+#+begin_src clojure
+;; when used with ~:setup~ get different behavior
+  (q/defsketch diagonals3
+    :size [480 120]
+    :setup #(let [x (overtone.algo.chance/weighted-choose [10 20 40 90] [0.5 0.3 0.125 0.075])]
+	    (do (q/stroke-weight (rand-int x))
+		(q/line 10 40 (+ 10 50) 80))))
+#+end_src
+
+#+RESULTS:
+: #'quilbabel.dynamic/diagonals3
+
+** use ~dorun~ in a setup function
+#+begin_src clojure
+;; use setup with dorun
+(q/defsketch diagonals3
+:size [480 120]
+:setup #(dorun (for [n (range 20 400 60)] (q/line n 40 (+ n 60) 80))))
+#+end_src
+
+#+RESULTS:
+: #'quilbabel.dynamic/diagonals3
+
+#+begin_src clojure
+;; proper use of ~for~ loop with ~do~ block?!
+  (q/defsketch diagonals3
+    :size [480 120]
+    :setup #(dorun (for [n (range 20 400 60)]
+		     (do (let [x (overtone.algo.chance/weighted-choose [10 20 40 90] [0.5 0.3 0.125 0.075])]
+			   (q/stroke-weight (rand-int x))
+			   (q/line n 40 (+ n 60) 80))))))
+#+end_src
+
+#+RESULTS:
+: #'quilbabel.dynamic/diagonals3
+
+** primitive ~overtone~ call in a quil ~sketch~
+#+begin_src clojure
+((overtone.live/synth (overtone.live/out 0 (overtone.live/sin-osc))))
+#+end_src
+
+#+RESULTS:
+: #<synth-node[loading]: quilbabel.dynamic/anon-3 39>
+
+#+begin_src clojure
+(overtone.live/kill 39)
+#+end_src
+
+#+RESULTS:
+: nil
+
+#+begin_src clojure
+  ;; proper use of ~for~ loop with ~do~ block?!
+  (q/defsketch diagonals3
+    :size [480 120]
+    :setup #(dorun (for [n (range 20 400 60)]
+		     (do (let [x (overtone.algo.chance/weighted-choose [10 20 40 90] [0.5 0.3 0.125 0.075])]
+			   (q/stroke-weight (rand-int x))
+			   ((overtone.live/synth (overtone.live/out 0 (overtone.live/sin-osc (+ (rand-nth [100 300 500]) (* 10 (rand) ))))))
+			   (q/line n 40 (+ n 60) 80))))))
+#+end_src
+
+#+RESULTS:
+: #'quilbabel.dynamic/diagonals3
+
+** save a frame?
+Without an argument...
+
+/Users/ao/scratch/quilbabel/screen-0000.tif
+
+#+begin_src clojure :show-process t
+;; writes to wherever notion of "current directory" is
+  (q/defsketch diagonals3
+    :size [480 120]
+    :setup #(do (q/stroke-weight (rand-int 8))
+		(dorun (for [n (range 20 400 60)] (q/line n 40 (+ n 60) 80)))
+		(q/save-frame)
+    ))
+#+end_src
+
+#+RESULTS:
+: #'quilbabel.core/diagonals3
+
+#+begin_src clojure
+  ;; stroke-weight set just once
+  (q/defsketch diagonals3
+    :size [480 120]
+    :setup #(do (q/stroke-weight (rand-int 8))
+		(dorun (for [n (range 20 400 60)] (q/line n 40 (+ n 60) 80)))
+		(q/save-frame "./resources/lines1.jpg")
+    ))
+#+end_src
+
+#+RESULTS:
+: #'quilbabel.core/diagonals3
+
+#+begin_src clojure :results output
+(clojure.repl/doc q/save-frame)
+#+end_src
+
+#+RESULTS:
+#+begin_example
+-------------------------
+quil.core/save-frame
+([] [name])
+  Saves an image identical to the current display window as a
+  file. May be called multple times - each file saved will have a
+  unique name. Name and image formate may be modified by passing a
+  string parameter of the form "foo-####.ext" where foo- can be any
+  arbitrary string, #### will be replaced with the current frame id
+  and .ext is one of .tiff, .targa, .png, .jpeg or .jpg
+
+  Examples:
+  (save-frame)
+  (save-frame "pretty-pic-####.jpg")
+#+end_example
+
+** translating arbitrary GSWP code
+#+begin_src processing
+size(480, 120);
+noStroke();
+background(204, 226, 225);    // Light blue color
+fill(255, 0, 0, 160);         // Red color
+ellipse(132, 82, 200, 200);   // Red circle
+fill(0, 255, 0, 160);         // Green color
+ellipse(228, -16, 200, 200);  // Green circle
+fill(0, 0, 255, 160);         // Blue color
+ellipse(268, 118, 200, 200);  // Blue circle
+
+#+end_src
+
+#+begin_src clojure
+  (q/defsketch diagonals3
+    :size [480 120]
+    :setup #(do (q/no-stroke)
+(q/background 204, 226, 225)
+(q/fill 255, 0, 0, 160)
+(q/ellipse 132, 82, 200, 200)
+(q/fill 0, 255, 0, 160)
+(q/ellipse 228, -16, 200, 200)
+(q/fill 0, 0, 255, 160)
+(q/ellipse 268, 118, 200, 200)
+(q/save-frame "./resources/colors1.jpg")
+    ))
+#+end_src
+
+#+RESULTS:
+: #'quilbabel.dynamic/diagonals3
+
+* testing misc. clojure blocks
+#+begin_src clojure
+(for [n (range 5)] (rand-int 8))
+#+end_src
+
+#+RESULTS:
+| 6 | 7 | 5 | 6 | 4 |
+
+
+#+begin_src clojure
+*ns*
+#+end_src
+
+#+RESULTS:
+: #namespace[quilbabel.dynamic]
+
+#+begin_src clojure :results output
+(clojure.repl/dir quilbabel.dynamic)
+#+end_src
+
+#+RESULTS:
+: diagonals3
+: draw
+: setup
+
+Pretty-print!
+#+begin_src clojure :results value pp
+(loaded-libs)
+#+end_src
+
+#+RESULTS:
+#+begin_example
+#{cider.inlined-deps.cljs-tooling.v0v2v0.cljs-tooling.complete
+  cider.inlined-deps.cljs-tooling.v0v2v0.cljs-tooling.info
+  cider.inlined-deps.cljs-tooling.v0v2v0.cljs-tooling.util.analysis
+  cider.inlined-deps.cljs-tooling.v0v2v0.cljs-tooling.util.misc
+  cider.inlined-deps.compliment.v0v3v4.compliment.context
+  cider.inlined-deps.compliment.v0v3v4.compliment.core
+  cider.inlined-deps.compliment.v0v3v4.compliment.sources
+  cider.inlined-deps.compliment.v0v3v4.compliment.sources.class-members
+  cider.inlined-deps.compliment.v0v3v4.compliment.sources.keywords
+  cider.inlined-deps.compliment.v0v3v4.compliment.sources.local-bindings
+  cider.inlined-deps.compliment.v0v3v4.compliment.sources.namespaces-and-classes
+  cider.inlined-deps.compliment.v0v3v4.compliment.sources.ns-mappings
+  cider.inlined-deps.compliment.v0v3v4.compliment.sources.resources
+  cider.inlined-deps.compliment.v0v3v4.compliment.sources.special-forms
+  cider.inlined-deps.compliment.v0v3v4.compliment.utils
+  cider.inlined-deps.javaclasspath.v0v2v3.clojure.java.classpath
+  cider.inlined-deps.toolsnamespace.v0v3v0-alpha3.clojure.tools.namespace.dependency
+  cider.inlined-deps.toolsnamespace.v0v3v0-alpha3.clojure.tools.namespace.file
+  cider.inlined-deps.toolsnamespace.v0v3v0-alpha3.clojure.tools.namespace.find
+  cider.inlined-deps.toolsnamespace.v0v3v0-alpha3.clojure.tools.namespace.parse
+  cider.inlined-deps.toolsnamespace.v0v3v0-alpha3.clojure.tools.namespace.track
+  cider.inlined-deps.toolsreader.v1v0v0.clojure.tools.reader
+  cider.inlined-deps.toolsreader.v1v0v0.clojure.tools.reader.default-data-readers
+  cider.inlined-deps.toolsreader.v1v0v0.clojure.tools.reader.impl.commons
+  cider.inlined-deps.toolsreader.v1v0v0.clojure.tools.reader.impl.utils
+  cider.inlined-deps.toolsreader.v1v0v0.clojure.tools.reader.reader-types
+  cider.nrepl cider.nrepl.middleware.complete
+  cider.nrepl.middleware.debug cider.nrepl.middleware.info
+  cider.nrepl.middleware.inspect cider.nrepl.middleware.ns
+  cider.nrepl.middleware.out cider.nrepl.middleware.pprint
+  cider.nrepl.middleware.stacktrace cider.nrepl.middleware.track-state
+  cider.nrepl.middleware.util.cljs
+  cider.nrepl.middleware.util.error-handling
+  cider.nrepl.middleware.util.inspect
+  cider.nrepl.middleware.util.instrument
+  cider.nrepl.middleware.util.java
+  cider.nrepl.middleware.util.java.parser
+  cider.nrepl.middleware.util.meta cider.nrepl.middleware.util.misc
+  cider.nrepl.middleware.util.namespace
+  cider.nrepl.middleware.util.spec cider.nrepl.print-method
+  cider.nrepl.version clj-native.callbacks clj-native.direct
+  clj-native.direct-util clj-native.functions clj-native.structs
+  clj-native.unions clojure.core.protocols clojure.core.server
+  clojure.data.json clojure.edn clojure.instant clojure.java.browse
+  clojure.java.io clojure.java.javadoc clojure.java.shell clojure.main
+  clojure.pprint clojure.reflect clojure.repl clojure.set
+  clojure.stacktrace clojure.string clojure.template clojure.test
+  clojure.tools.nrepl clojure.tools.nrepl.ack
+  clojure.tools.nrepl.bencode clojure.tools.nrepl.middleware
+  clojure.tools.nrepl.middleware.interruptible-eval
+  clojure.tools.nrepl.middleware.load-file
+  clojure.tools.nrepl.middleware.pr-values
+  clojure.tools.nrepl.middleware.session clojure.tools.nrepl.misc
+  clojure.tools.nrepl.server clojure.tools.nrepl.transport clojure.uuid
+  clojure.walk clojure.zip complete.core dynapath.defaults
+  dynapath.dynamic-classpath dynapath.util org.satta.glob
+  overtone.algo.chance overtone.algo.fn overtone.algo.lists
+  overtone.algo.scaling overtone.algo.trig overtone.api overtone.at-at
+  overtone.byte-spec overtone.config.file-store overtone.config.log
+  overtone.config.store overtone.helpers.audio-file
+  overtone.helpers.doc overtone.helpers.file overtone.helpers.hash
+  overtone.helpers.lib overtone.helpers.map overtone.helpers.math
+  overtone.helpers.ns overtone.helpers.old-contrib overtone.helpers.ref
+  overtone.helpers.seq overtone.helpers.stereo overtone.helpers.string
+  overtone.helpers.synth overtone.helpers.system overtone.helpers.zip
+  overtone.jna-path overtone.libs.app-icon overtone.libs.asset
+  overtone.libs.asset.store overtone.libs.boot-msg
+  overtone.libs.counters overtone.libs.deps overtone.libs.event
+  overtone.libs.handlers overtone.live overtone.midi
+  overtone.music.pitch overtone.music.rhythm overtone.music.time
+  overtone.music.tuning overtone.nativescsynth.availability
+  overtone.osc overtone.osc.decode overtone.osc.dyn-vars
+  overtone.osc.encode overtone.osc.pattern overtone.osc.peer
+  overtone.osc.util overtone.repl.debug overtone.repl.examples
+  overtone.repl.graphviz overtone.repl.inst overtone.repl.shell
+  overtone.repl.ugens overtone.samples.freesound
+  overtone.samples.freesound.search-results
+  overtone.samples.freesound.url overtone.sc.bindings
+  overtone.sc.buffer overtone.sc.bus overtone.sc.cgens.audio-in
+  overtone.sc.cgens.beq-suite overtone.sc.cgens.berlach
+  overtone.sc.cgens.bhob overtone.sc.cgens.buf-io
+  overtone.sc.cgens.demand overtone.sc.cgens.dyn overtone.sc.cgens.env
+  overtone.sc.cgens.freq overtone.sc.cgens.fx overtone.sc.cgens.info
+  overtone.sc.cgens.io overtone.sc.cgens.line overtone.sc.cgens.mix
+  overtone.sc.cgens.oscillators overtone.sc.cgens.tap overtone.sc.clock
+  overtone.sc.defaults overtone.sc.defcgen overtone.sc.dyn-vars
+  overtone.sc.envelope overtone.sc.example
+  overtone.sc.examples.audio-in overtone.sc.examples.blackrain
+  overtone.sc.examples.compander overtone.sc.examples.demand
+  overtone.sc.examples.dyn overtone.sc.examples.membrane
+  overtone.sc.examples.osc overtone.sc.examples.trig
+  overtone.sc.examples.vosim overtone.sc.foundation-groups
+  overtone.sc.info overtone.sc.machinery.allocator
+  overtone.sc.machinery.defexample overtone.sc.machinery.server.args
+  overtone.sc.machinery.server.comms
+  overtone.sc.machinery.server.connection
+  overtone.sc.machinery.server.native
+  overtone.sc.machinery.server.osc-validator
+  overtone.sc.machinery.synthdef overtone.sc.machinery.ugen.categories
+  overtone.sc.machinery.ugen.check overtone.sc.machinery.ugen.common
+  overtone.sc.machinery.ugen.defaults overtone.sc.machinery.ugen.doc
+  overtone.sc.machinery.ugen.fn-gen
+  overtone.sc.machinery.ugen.intern-ns
+  overtone.sc.machinery.ugen.metadata.basicops
+  overtone.sc.machinery.ugen.metadata.beq-suite
+  overtone.sc.machinery.ugen.metadata.binaryopugen
+  overtone.sc.machinery.ugen.metadata.buf-io
+  overtone.sc.machinery.ugen.metadata.chaos
+  overtone.sc.machinery.ugen.metadata.compander
+  overtone.sc.machinery.ugen.metadata.control
+  overtone.sc.machinery.ugen.metadata.delay
+  overtone.sc.machinery.ugen.metadata.demand
+  overtone.sc.machinery.ugen.metadata.envgen
+  overtone.sc.machinery.ugen.metadata.extras.ay
+  overtone.sc.machinery.ugen.metadata.extras.bat
+  overtone.sc.machinery.ugen.metadata.extras.bbcut2u
+  overtone.sc.machinery.ugen.metadata.extras.berlach
+  overtone.sc.machinery.ugen.metadata.extras.bhob
+  overtone.sc.machinery.ugen.metadata.extras.blackrain
+  overtone.sc.machinery.ugen.metadata.extras.distortion
+  overtone.sc.machinery.ugen.metadata.extras.glitch
+  overtone.sc.machinery.ugen.metadata.extras.mda
+  overtone.sc.machinery.ugen.metadata.extras.membrane
+  overtone.sc.machinery.ugen.metadata.extras.sl
+  overtone.sc.machinery.ugen.metadata.extras.stk
+  overtone.sc.machinery.ugen.metadata.extras.tju
+  overtone.sc.machinery.ugen.metadata.extras.vbap
+  overtone.sc.machinery.ugen.metadata.extras.vosim
+  overtone.sc.machinery.ugen.metadata.ff-osc
+  overtone.sc.machinery.ugen.metadata.fft
+  overtone.sc.machinery.ugen.metadata.fft-unpacking
+  overtone.sc.machinery.ugen.metadata.fft2
+  overtone.sc.machinery.ugen.metadata.filter
+  overtone.sc.machinery.ugen.metadata.grain
+  overtone.sc.machinery.ugen.metadata.info
+  overtone.sc.machinery.ugen.metadata.input
+  overtone.sc.machinery.ugen.metadata.io
+  overtone.sc.machinery.ugen.metadata.line
+  overtone.sc.machinery.ugen.metadata.machine-listening
+  overtone.sc.machinery.ugen.metadata.misc
+  overtone.sc.machinery.ugen.metadata.noise
+  overtone.sc.machinery.ugen.metadata.osc
+  overtone.sc.machinery.ugen.metadata.pan
+  overtone.sc.machinery.ugen.metadata.random
+  overtone.sc.machinery.ugen.metadata.trig
+  overtone.sc.machinery.ugen.metadata.unaryopugen
+  overtone.sc.machinery.ugen.sc-ugen
+  overtone.sc.machinery.ugen.special-ops
+  overtone.sc.machinery.ugen.specs overtone.sc.node
+  overtone.sc.protocols overtone.sc.sample overtone.sc.server
+  overtone.sc.synth overtone.sc.trig overtone.sc.ugens overtone.sc.util
+  overtone.sc.vbap overtone.speech overtone.studio.core
+  overtone.studio.fx overtone.studio.inst overtone.studio.midi
+  overtone.studio.midi-player overtone.studio.mixer
+  overtone.studio.scope overtone.studio.util overtone.studio.wavetable
+  overtone.version quil.applet quil.core quil.helpers.applet-listener
+  quil.helpers.docs quil.middleware quil.middlewares.bind-output
+  quil.middlewares.deprecated-options quil.middlewares.fun-mode
+  quil.middlewares.navigation-2d quil.middlewares.navigation-3d
+  quil.middlewares.pause-on-error quil.middlewares.safe-fns quil.sketch
+  quil.util quilbabel.core quilbabel.dynamic}
+#+end_example
+
+* Processing translation
+README of processing-examples
+[[file:~/org/secondary/processing-examples/README.org::*babel%20sandbox][babel sandbox]]
