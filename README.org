@@ -62,7 +62,7 @@ Must eval the namespace change in the REPL?
 #+end_src
 
 #+RESULTS:
-: #'quilbabel.dynamic/draw
+: #'quilbabel.core/draw
 
 
 Now, you need not even reload!! Just eval the block
@@ -321,7 +321,7 @@ But, no matter how much you want to change the frame-rate from setup, it appears
   :ID:       828D0FC4-0291-4FE4-B457-CF3DD7864E27
   :END:
 ** concentrate circles in the top corner
-#+begin_src clojure :show-process t
+#+begin_src clojure :show-process t :results silent
   (q/defsketch ellipses-with-fn-literals1
     :setup #(q/frame-rate 10)
     :draw #(q/ellipse (q/random 100) (q/random 100) 10 10)
@@ -329,7 +329,7 @@ But, no matter how much you want to change the frame-rate from setup, it appears
 #+end_src
 
 #+RESULTS:
-: #'quilbabel.core/allone
+: #'my-simple-enlive.core/ellipses-with-fn-literals1
 ** use a ~do~ block to run two different drawings concurrent
 #+begin_src clojure :show-process t
   (q/defsketch ellipses-with-fn-literals2
@@ -436,7 +436,7 @@ FAILS
 ** use setup with ~random~ values
 #+RESULTS:
 : #'quilbabel.core/diagonals3
-#+begin_src clojure :show-process t
+#+begin_src clojure :show-process t :results silent
 ;; stroke-weight set just once
 (q/defsketch diagonals3
 :size [480 120]
@@ -603,7 +603,7 @@ ellipse(268, 118, 200, 200);  // Blue circle
 
 #+end_src
 
-#+begin_src clojure
+#+begin_src clojure :results silent
   (q/defsketch diagonals3
     :size [480 120]
     :setup #(do (q/no-stroke)
@@ -614,7 +614,8 @@ ellipse(268, 118, 200, 200);  // Blue circle
 (q/ellipse 228, -16, 200, 200)
 (q/fill 0, 0, 255, 160)
 (q/ellipse 268, 118, 200, 200)
-(q/save-frame "./resources/colors1.jpg")
+;; save-frame?
+;; (q/save-frame "./resources/colors1.jpg")
     ))
 #+end_src
 
@@ -646,7 +647,7 @@ ellipse(268, 118, 200, 200);  // Blue circle
 : draw
 : setup
 
-Pretty-print!
+Pretty-print! (an impressively long and vaguely helpful list)
 #+begin_src clojure :results value pp
 (loaded-libs)
 #+end_src
@@ -819,3 +820,829 @@ Pretty-print!
 * Processing translation
 README of processing-examples
 [[file:~/org/secondary/processing-examples/README.org::*babel%20sandbox][babel sandbox]]
+
+* text and typography practice
+
+** simplest
+#+begin_src clojure :results silent
+(q/defsketch texty
+:size [480, 120]
+:setup #(q/text-font (q/create-font "data/Trattatello.ttf" 24))
+:draw #(do (q/text-size 48) (q/text "YO Adrian" 100, 50))
+  )
+#+end_src
+** use Letter.pde model from Processing Basics
+#+begin_src clojure :results silent
+  (q/defsketch texty
+    :size [640, 360]
+
+    :setup #(do (q/background 0)
+		(q/text-font
+		 (q/create-font "data/SourceCodePro-Regular.ttf" 24))
+		(q/text-align :center, :center))
+    :draw #(dorun 
+	    (let [counter 35]
+	      (for [y (range 0 360 46)]
+		(for [x (range 0 640 46)]
+		  (let [letter (char counter)]
+		    (q/fill 255)
+		    (q/text letter, x, y)
+		    (inc counter)
+		    )
+		  ))))
+)
+#+end_src
+
+
+#+begin_src clojure :results silent
+  (q/defsketch diagonals3
+    :size [480 120]
+    :setup #(loop [n 20] 
+	      (q/line n 40 (+ (* 8 n) 60) 80)
+	      (if (> n 40) nil (recur (inc n)))
+	      ))
+#+end_src
+
+#+begin_src clojure :results silent
+  (q/defsketch texty
+    :size [640, 360]
+    :setup #(do (q/background 0) (q/text-font (q/create-font "data/SourceCodePro-Regular.ttf" 24)) (q/text-align :center, :center))
+    :draw #(loop [counter 35]
+    (dorun (for [y (range 0 360 46)]
+	       (for [x (range 0 640 46)]
+		 (let [letter (char counter)]
+		   (q/fill 255)
+		   (q/text letter, x, y)))))
+	     (if (> counter 98) nil (recur (inc counter)))))
+#+end_src
+
+#+begin_src clojure :results silent
+(q/defsketch simpler-text
+:size [640, 360]
+:setup #(do (q/text-font (q/create-font "data/SourceCodePro-Regular.ttf" 24))) 
+:draw #(q/text (str (char 35)) 100, 40)
+)
+#+end_src
+
+#+begin_src clojure :results silent :session *cider-repl quilbabel*
+(q/defsketch simpler-text
+:size [640, 360]
+:setup #(do (q/text-font (q/create-font "data/SourceCodePro-Regular.ttf" 24)) (q/text (str (char 35)) 100, 40)) 
+)
+#+end_src
+
+#+begin_src clojure :results silent :session *cider-repl quilbabel*
+(q/defsketch simpler-text
+:size [640, 360]
+:setup #(do (q/text-font (q/create-font "data/SourceCodePro-Regular.ttf" 24)) (q/text (str (char (+ 35 (rand-int 94)))) 600, 40))
+)
+#+end_src
+
+#+begin_src clojure :results silent
+  (q/defsketch simpler-text
+  :size [640, 360]
+    :setup #(do (q/text-font (q/create-font "data/SourceCodePro-Regular.ttf" 24))
+		   (loop [letter 35] (q/text (str (char letter)) 600, 40) (if (> letter 35) nil (recur (inc letter)))))
+  )
+#+end_src
+
+#+begin_src clojure :results silent
+  (q/defsketch simpler-text
+  :size [640, 360]
+    :setup #(do (q/background 0) (q/text-font (q/create-font "data/SourceCodePro-Regular.ttf" 24))
+		(loop [letter 65]
+		  (dorun (for [x [580 620]] (q/text (str (char letter)) x, 40)))
+		  (if (> letter 36) nil (recur (inc letter)))))
+    )
+#+end_src
+
+#+begin_src clojure :results silent
+  (q/defsketch simpler-text
+    :size [640, 360]
+    :setup #(do (q/background 0) (q/text-font (q/create-font "data/SourceCodePro-Regular.ttf" 24))
+		(dorun (for [x [580 620]
+			     letter [65 66]]
+			 (q/text (str (char letter)) x, 40)))))
+
+
+#+end_src
+
+
+#+begin_src clojure :results silent
+    (q/defsketch simpler-text
+      :size [640, 360]
+      :setup #(do (q/background 0) (q/text-font (q/create-font "data/SourceCodePro-Regular.ttf" 24))
+		  (dorun (for [x [580 620]]
+			   (dorun (for [letter [65 66]]
+			     (q/text (str (char letter)) x, 40)))))))
+
+
+#+end_src
+
+#+begin_src clojure :results output
+(loop [n [1 2 3] x [10 100 1000]] (println (clojure.string/join [(first x) (first n)])) (if (empty? n) nil (recur (rest n) (rest x))))
+#+end_src
+
+#+RESULTS:
+: 101
+: 1002
+: 10003
+: 
+
+
+#+begin_src clojure :results silent
+    (q/defsketch simpler-text
+      :size [640, 360]
+      :setup #(do (q/background 0) (q/text-font (q/create-font "data/SourceCodePro-Regular.ttf" 24)) (loop [x [580 600] letter [65 66]] (q/text (str (char (first letter))) (first x), 40) (if (empty? x) nil (recur (rest x) (rest letter)))))
+)
+#+end_src
+
+#+begin_src clojure :results silent
+  (q/defsketch simpler-text
+    :size [640, 360]
+    :setup #(do (q/background 0) (q/text-font (q/create-font "data/SourceCodePro-Regular.ttf" 24)) 
+		(dorun 
+		 (loop [x [580 600] letter [65 66]] (q/text (str (char (first letter))) (first x), 40) (if (empty? x) nil (recur (rest x) (rest letter))))))
+    )
+#+end_src
+
+#+begin_src clojure :results silent
+  (q/defsketch simpler-text
+    :size [640, 360]
+    :setup #(do (q/background 0) (q/text-font (q/create-font "data/SourceCodePro-Regular.ttf" 24)) 
+			 (loop [x [580 600] letter [65 66]] (q/text (str (char (first letter))) (first x), 40) (if (empty? x) nil (recur (rest x) (rest letter)))))
+    )
+#+end_src
+
+#+begin_src clojure :results silent
+  (q/defsketch simpler-text
+    :size [640, 360]
+    :setup #(do (q/background 0) (q/text-font (q/create-font "data/SourceCodePro-Regular.ttf" 24))) 
+    :draw #(loop [x [580 600] letter [65 66]] (q/text (str (char (first letter))) (first x), 40) (if (empty? x) nil (recur (rest x) (rest letter))))
+    )
+#+end_src
+
+
+
+#+begin_src clojure
+;; succeeds!
+(q/defsketch diagonals1
+:size [480 120]
+:setup #(q/stroke-weight 8) 
+:draw #(q/point 100 40)
+)
+#+end_src
+
+#+RESULTS:
+: #'quilbabel.dynamic/diagonals1
+
+#+begin_src clojure
+;; succeeds!
+(q/defsketch dots
+:size [480 120]
+:setup #(q/stroke-weight 8) 
+:draw #(dorun (for [x (range 0 480 20)] (q/point x 40)))
+)
+#+end_src
+
+#+RESULTS:
+: #'quilbabel.dynamic/dots
+
+#+begin_src clojure
+  ;; succeeds!
+  (q/defsketch rows-of-dots
+  :size [480 120]
+  :setup #(q/stroke-weight 8) 
+  :draw #(dorun (for [x (range 0 480 20)]
+		  (dorun (for [y (range 0 120 40)] (q/point x y)))))
+  )
+#+end_src
+
+#+RESULTS:
+: #'quilbabel.dynamic/rows-of-dots
+
+#+begin_src clojure
+  ;; succeeds!
+  (q/defsketch rows-of-dots
+  :size [480 120]
+  :setup #(q/stroke-weight 8) 
+  :draw (fn [] (dorun (for [x (range 0 480 20)]
+		  (dorun (for [y (range 0 120 40)] (q/point x y))))))
+  )
+#+end_src
+
+#+RESULTS:
+: #'quilbabel.dynamic/rows-of-dots
+
+#+begin_src clojure
+;; works not so good
+  (q/defsketch rows-of-dots
+    :size [480 120]
+    :setup #(do (q/background 0) (q/text-font (q/create-font "data/SourceCodePro-Regular.ttf" 24)))
+    :draw (fn [](dorun
+	    (for [x (range 40 480 20)]
+	      (dorun
+	       (for [y (range 20  120 40)] 
+		 (loop [letter (seq (range 65 100))]
+		   (q/text (str (char (first letter))) x, y)
+		   (if (empty? letter) nil (recur (rest letter))))
+			     ))))))
+#+end_src
+
+#+RESULTS:
+: #'quilbabel.dynamic/rows-of-dots
+#+begin_src clojure :results silent
+;; pray for helpful iterating distraction
+(require '[quil.helpers.seqs :as qs])
+(require '[quil.helpers.calc :as qc])
+
+(q/defsketch noise-grid
+:size [300 300]
+ :setup #(do (q/smooth) (dorun
+
+   (let [x-start (q/random 10)
+         y-start (q/random 10)]
+     (for [y (qs/range-incl (q/height))
+           x (qs/range-incl (q/width))]
+       (let [x-noise (qc/mul-add x 0.01 x-start)
+             y-noise (qc/mul-add y 0.01 y-start)
+             alph    (* 255 (q/noise x-noise y-noise))]
+         (q/stroke-int 0 alph)
+         (q/line x y (inc x) (inc y))))))))
+#+end_src
+
+#+begin_src clojure
+  ;; prints all on top of one place??
+  (q/defsketch rows-of-dots
+    :size [480 120]
+    :setup #(do (q/background 0)
+		(q/text-font (q/create-font "data/SourceCodePro-Regular.ttf" 24))
+		(dorun
+		 (for [x (range 40 480 20)
+		       y (range 20 120 40)]
+		   (loop [letter (seq (range 65 100))]
+		     (q/text (str (char (first letter))) x, y)
+		     (if (empty? letter) nil (recur (rest letter))))
+		   ))))
+#+end_src
+
+#+RESULTS:
+: #'quilbabel.dynamic/rows-of-dots
+
+#+begin_src clojure :results silent
+;; prints but one letter do to not using dorun
+  (q/defsketch rows-of-dots
+    :size [480 120]
+    :setup (fn [] (dorun
+		(q/text-font (q/create-font "data/SourceCodePro-Regular.ttf" 24))
+(map #(q/text (str (char %1)) %2 %3) (range 65 68) [40 200 360 480] [20 50 80 110]))))
+#+end_src
+
+#+begin_src clojure :results silent
+;; works, given all that it purports to do  
+
+(q/defsketch rows-of-dots
+    :size [640 360]
+    :setup (fn [] (do (q/background 0)
+		(q/text-font (q/create-font "data/SourceCodePro-Regular.ttf" 24))
+(dorun (map #(q/text (str (char %1)) %2 %3) (range 65 69) [40 200 360 480] [20 50 80 110])))))
+#+end_src
+
+
+#+begin_src clojure :results value scalar
+(map #(q/text (str (char %1)) %2)  (range 65 75) (for [y [40 80 120] x [20 240 460]] (vector y x)))
+(map #(cons %1 %2) (range 65 75) (for [y [40 80 120] x [20 240 460]] (vector y x)))
+#+end_src
+
+#+begin_src clojure :results value scalar
+(map #(cons %1 %2) (range 65 75) (for [y [40 80 120] x [20 240 460]] (vector y x)))
+#+end_src
+
+#+RESULTS:
+: ((65 40 20) (66 40 240) (67 40 460) (68 80 20) (69 80 240) (70 80 460) (71 120 20) (72 120 240) (73 120 460))
+
+#+begin_src clojure :results value scalar
+(map (fn [coll] (apply + coll)) (map #(cons %1 %2) (range 65 75) (for [y [40 80 120] x [20 240 460]] (vector y x))))
+#+end_src
+
+#+RESULTS:
+: (125 346 567 168 389 610 211 432 653)
+
+#+begin_src clojure :results value scalar
+(map (fn [coll] (apply #(q/text (str (char (first coll)) (second coll) (third coll))))) (map #(cons %1 %2) (range 65 75) (for [y [40 80 120] x [20 240 460]] (vector y x))))
+#+end_src
+
+#+begin_src clojure :results silent
+  ;; not really
+  (q/defsketch rows-of-dots
+    :size [480 120]
+    :setup (fn [] (do (q/text-font (q/create-font "data/SourceCodePro-Regular.ttf" 24))
+		      (dorun (map
+			      (fn [coll] (apply #(q/text (str (char (first coll)) (second coll) (nth coll 2)))))
+			      (map #(cons %1 %2) (range 65 75) (for [y [40 80 120] x [20 240 460]] (vector y x)))) ))))
+#+end_src
+
+#+begin_src clojure :results silent
+  ;; hmm
+  (q/defsketch rows-of-dots
+    :size [480 120]
+    :setup (fn [] (do (q/stroke-weight 8)
+		      (dorun (map (fn [coll]
+				    (apply q/point coll))
+				  (for [y [40 80 120] x [20 240 460]] (vector y x)))))))
+#+end_src
+
+
+#+begin_src clojure :results silent
+  ;; ohh
+  (q/defsketch rows-of-dots
+    :size [480 240]
+    :setup (fn [] (do (q/stroke-weight 8)
+		      (dorun (map (fn [coll]
+				    (apply q/point coll))
+				  (for [y [40 80 120] x [20 240 460]] (vector x y)))))))
+#+end_src
+
+
+
+#+begin_src clojure :results silent
+  ;; ahh! something
+  (q/defsketch rows-of-dots
+    :size [480 240]
+    :setup (fn [] (do (q/stroke-weight 8)
+		      (dorun (map (fn [coll]
+				    (apply q/point coll))
+				  (for [y (range 20 220 20) x (range 20 460 20)] (vector x y)))))))
+#+end_src
+
+#+begin_src clojure :results silent
+
+  (q/defsketch rows-of-letterz
+    :size [480 240]
+    :setup (fn [] (do (q/text-font (q/create-font "data/SourceCodePro-Regular.ttf" 24))
+		      (dorun (map (fn [coll]
+				    (apply #(q/text (str (char %1)) %2 %3) coll)
+				    (for [y (range 20 220 20) x (range 20 460 20)] (vector x y)))))))
+#+end_src
+
+#+begin_src clojure :results silent
+
+  (q/defsketch lettur
+    :size [480 240]
+    :setup (fn [] (do (q/text-font (q/create-font "data/SourceCodePro-Regular.ttf" 24))
+		      (q/text "A" 80 120))))
+
+#+end_src
+
+
+#+begin_src clojure :results silent
+
+  (q/defsketch rows-of-letterz
+    :size [480 240]
+    :setup (fn [] (dorun (q/text-font (q/create-font "data/SourceCodePro-Regular.ttf" 24))
+			 (map (partial #(q/text (str (char (first %))) (second %) (nth % 2)))
+			      (for [y (range 20 220 20) x (range 20 460 20)] (vector x y)))
+			 )))
+#+end_src
+
+#+begin_src clojure :results silent
+
+  (q/defsketch a-lettur
+    :size [480 240]
+    :setup #(dorun (q/text-font (q/create-font "data/SourceCodePro-Regular.ttf" 24))
+			 (map (partial (fn do-it [coll] (q/text (str (char (first coll))) (second coll) (nth coll 2))))
+			      (map (fn add-to [n xs] (cons n xs)) (range 65 75) (for [y (range 20 220 20) x (range 20 460 20)] (vector x y)))
+			 )))
+#+end_src
+
+#+begin_src clojure :results silent
+
+  (q/defsketch no-lettur-with-doruns
+    :size [480 240]
+    :setup #(dorun (q/text-font (q/create-font "data/SourceCodePro-Regular.ttf" 24))
+		(dorun
+
+		 (map
+		  (partial
+		   (fn do-it [coll] (q/text (str (char (first coll))) (second coll) (nth coll 2))))
+
+		  (dorun
+		   (map
+		    (fn add-to [n xs] (cons n xs))
+		    (range 65 75)
+		    (for [y (range 20 220 20) x (range 20 460 20)] (vector x y))))))
+		(q/background 0)))
+#+end_src
+** doesn't use the font created with create-font??
+#+begin_src clojure :results silent
+;;; uhhhh, ok
+
+  (q/defsketch no-lettur-with-doruns
+    :size [480 240]
+    :setup #(do (q/text-font (q/create-font "data/SourceCodePro-Regular.ttf" 24)))
+    :draw #(dorun
+
+		 (map
+		  (partial
+		   (fn do-it [coll] (q/text (str (char (first coll))) (second coll) (nth coll 2))))
+
+
+		   (map
+		    (fn add-to [n xs] (cons n xs))
+		    (range 65 75)
+		    (for [y (range 20 220 20) x (range 20 460 20)] (vector x y))))))
+#+end_src
+
+Don't call me plezz
+#+begin_src clojure :results silent
+;;; uhhhh, very bad to put text-font in draw??
+
+  (q/defsketch no-lettur-with-doruns
+    :size [480 240]
+    :setup #(do (q/background 0))
+    :draw #(dorun (q/text-font (q/create-font "data/SourceCodePro-Regular.ttf" 24))
+    
+		 (map
+		  (partial
+		   (fn do-it [coll] (q/text (str (char (first coll))) (second coll) (nth coll 2))))
+
+
+		   (map
+		    (fn add-to [n xs] (cons n xs))
+		    (range 65 75)
+		    (for [y (range 20 220 20) x (range 20 460 20)] (vector x y))))))
+#+end_src
+** Basically reproduces original drawing template (missing color changes)!
+Uses a ~dorun~ in ~setup~ to create a complicated ~map~-ing scheme with anonymous functions
+#+begin_src clojure :results silent
+(q/defsketch something
+  :size [660 360]
+  :setup #(do (q/text-font (q/create-font "data/SourceCodePro-Regular.ttf" 24))
+                 (dorun
+
+		  (map
+		   (partial
+		    (fn do-it [coll] (q/text (str (char (first coll))) (second coll) (nth coll 2))))
+
+
+		   (map
+		    (fn add-to [n xs] (cons n xs))
+		    (range 35 127)
+		    (for [y (range 40 360 46) x (range 40 640 46)] (vector x y)))))))
+#+end_src
+
+
+Set the background color to black and accurately replicate the "gap" and "margins" of the original
+#+begin_src clojure :results silent
+(q/defsketch something
+  :size [640 360]
+  :setup #(do (q/translate 40, 40) (q/background 0) (q/text-font (q/create-font "data/SourceCodePro-Regular.ttf" 24))
+                 (dorun
+
+		  (map
+		   (partial
+		    (fn do-it [coll] (q/text (str (char (first coll))) (second coll) (nth coll 2))))
+
+
+		   (map
+		    (fn add-to [n xs] (cons n xs))
+		    (range 35 127)
+		    (for [y (range 0 (- 360 46) 46) x (range 0 (- 640 46) 46)] (vector x y)))))))
+#+end_src
+
+Changes fill-stroke, and uses destructuring names, but all is not well
+
+#+begin_src clojure :results silent
+  (q/defsketch something
+    :size [640 360]
+
+    :setup #(do (q/translate 40, 40) (q/background 0) (q/text-font (q/create-font "data/SourceCodePro-Regular.ttf" 24))
+		(dorun
+
+		 (map
+		  (partial
+		   (fn do-it [[letter x y]] 
+		     (do 
+		       (q/fill 255, 204, 0)
+		       (q/text (str (char letter)) x y))))
+
+		  (map
+		   (fn add-to [n xs] (cons n xs))
+		   (range 35 127)
+		   (for [y (range 0 (- 360 46) 46) x (range 0 (- 640 46) 46)] (vector x y)))))))
+#+end_src
+
+Running the text-drawing block from within draw somehow fails to load the font and the ~translate~ values
+#+begin_src clojure :results silent
+  (q/defsketch wrong-number-of-args-passed-fn
+    :size [640 360]
+    :middleware [quil.middleware/fun-mode quil.middleware/pause-on-error]
+    :setup #(do (q/translate 40, 40) (q/background 0) (q/text-font (q/create-font "data/SourceCodePro-Regular.ttf" 24)))
+    :draw 
+    (fn [state] 
+      (dorun
+       (map
+	(partial
+	 (fn do-it [[letter x y]] 
+	   (do
+	      (q/fill 255, 204, 0)
+	    (q/text (str (char letter)) x y))))
+
+
+	(map
+	 (fn add-to [n xs] (cons n xs))
+	 (range 35 127)
+	 (for [y (range 0 (- 360 46) 46) x (range 0 (- 640 46) 46)] (vector x y)))))))
+#+end_src
+
+#+begin_src clojure :results output
+  (q/defsketch wrong-number-of-args-passed-fn
+    :size [640 360]
+    :middleware [quil.middleware/fun-mode quil.middleware/pause-on-error]
+    :setup (fn [] (q/translate 40, 40) (q/background 0) (q/text-font (q/create-font "data/SourceCodePro-Regular.ttf" 24)))
+    :draw
+
+      (fn my-draw [& rest ]
+      (dorun
+      (map
+
+	(partial
+	 (fn do-it [[letter x y]] 
+	   (q/text (str (char letter)) x y)))
+
+	(map
+	 (fn add-to [n xs] (cons n xs))
+	 (range 35 127)
+	 (for [y (range 0 (- 360 46) 46) x (range 0 (- 640 46) 46)] (vector x y))))))
+    )
+#+end_src
+
+#+RESULTS:
+
+If you include fun-mode, you need to pass state!!??
+** using ~doseq~ for side-effects?
+
+
+#+begin_src clojure
+;; succeeds!
+(q/defsketch diagonals1
+:size [480 120]
+:setup #(q/stroke-weight 8) 
+:draw #(doseq [x (range 40 480 10)] (q/point x 40))
+)
+#+end_src
+
+#+begin_src clojure
+;; succeeds!
+(q/defsketch diagonals1
+:size [480 120]
+:setup #(do (q/frame-rate 1) (q/stroke-weight 8))
+:draw #(do (q/background 255) (doseq [x (range 40 480 10)] (q/point x (q/random 10 110))))
+)
+#+end_src
+
+#+begin_src clojure
+;; succeeds!
+(q/defsketch diagonals1
+:size [480 120]
+:setup #(do (q/frame-rate 1) (q/stroke-weight 2))
+:draw #(do (q/background 230) (doseq [x (range 0 (q/width))] (q/point x (q/random 10 110))))
+)
+#+end_src
+
+#+RESULTS:
+: #'quilbabel.dynamic/diagonals1
+
+#+begin_src clojure :results silent
+(q/defsketch diagonals1
+:size [480 120]
+:setup #(q/ellipse 132, 82, 200, 200))
+#+end_src
+
+#+begin_src clojure :results silent
+(q/defsketch diagonals1
+:size [480 120]
+:setup #(q/smooth) 
+:draw #(q/ellipse 132, 82, (* (q/random 1) 200), (* (q/random 1) 200)))
+#+end_src
+
+
+#+begin_src clojure
+;; wigging out with random colors in the draw!
+(q/defsketch diagonals1
+:size [480 120]
+;; :setup #(q/stroke-weight 1) 
+:setup #(q/ellipse-mode (rand-nth [:center]))
+:draw #(doseq [x (range 40 480 20)] (q/fill (q/random 255)) (q/ellipse x 40 20 20))
+)
+#+end_src
+
+#+RESULTS:
+: #'quilbabel.dynamic/diagonals1
+
+
+#+begin_src clojure
+  ;; wigging out with random colors in the draw!
+  (q/defsketch diagonals1
+  :size [480 120]
+  :setup #(q/frame-rate 1) ;; #(q/ellipse-mode (rand-nth [:radius :center :corner]))
+  :draw #(dorun (do (for [y (range 0 120 10) x (range 0 480 10)] (doseq [n (range 20)] ;; (q/fill (q/random 255))
+								    (q/ellipse x y n n)))))
+  )
+#+end_src
+
+#+begin_src clojure
+  ;; wigging out with random colors in the draw!
+  (q/defsketch diagonals1
+  :size [480 120]
+  :setup #(q/frame-rate 1) ;; #(q/ellipse-mode (rand-nth [:radius :center :corner]))
+  :draw #(dorun (do (q/background 255) (q/ellipse 20 20 (q/random 10 20) 10)))
+)
+#+end_src
+
+
+
+
+
+#+RESULTS:
+: #'quilbabel.dynamic/diagonals1
+
+#+begin_src clojure :results silent
+;; paints all sectors with all characters
+(q/defsketch doseqs-pleazz
+:size [640 360]
+:middleware [quil.middleware/pause-on-error]
+:setup (fn my-setup [] (q/translate 40, 40) (q/background 0) (q/text-font (q/create-font "data/SourceCodePro-Regular.ttf" 24)))
+:draw #(dorun (for [y (range 0 360 35) x (range 0 640 35)] (doseq [n (range 35 110)] (q/text (str (char n)) x y))))
+)
+#+end_src
+
+
+#+begin_src clojure
+;; wigging out with random colors and (random-ellipse mode transformations) in the draw!
+(q/defsketch diagonals1
+:size [480 120]
+:setup #(q/ellipse-mode (rand-nth [:radius :center :corner]))
+:draw #(doseq [n (range 10) y (range 0 120 20 ) x (range 0 480 20)] (q/fill (q/random 255)) (q/ellipse x y n n))
+)
+#+end_src
+
+#+RESULTS:
+: #'quilbabel.dynamic/diagonals1
+
+#+begin_src clojure
+;; slower wigging out with random colors in the draw!
+(q/defsketch diagonals1
+:size [480 120]
+:setup #(do (q/smooth) (q/ellipse-mode (rand-nth [:radius :center :corner])) (q/frame-rate 10))
+:draw #(doseq [n (range 10) y (range 0 120 20 ) x (range 0 480 20)] (q/fill (q/random 255)) (q/ellipse x y n n))
+)
+#+end_src
+
+#+RESULTS:
+: #'quilbabel.dynamic/diagonals1
+
+** whoa, randomness
+#+begin_src clojure :results output
+;; whoa, randomness   
+ (q/defsketch wrong-number-of-args-passed-fn
+      :size [640 360]
+      :middleware [quil.middleware/fun-mode quil.middleware/pause-on-error]
+      :setup (fn my-setup [] (do (q/translate 40, 40) (q/background 0)))
+      :draw (fn my-draw [state] (dorun (apply q/ellipse (repeatedly 4 #(q/random 20 120))))
+      ))
+#+end_src
+
+#+begin_src clojure :results output
+;; will fail if you remove "state" argument but still include fun-mode middleware
+ (q/defsketch wrong-number-of-args-passed-fn
+      :size [640 360]
+      :middleware [quil.middleware/fun-mode quil.middleware/pause-on-error]
+      :setup (fn my-setup [] (do (q/translate 40, 40) (q/background 0)))
+      :draw (fn my-draw [] (dorun (apply q/ellipse (repeatedly 4 #(q/random 20 120))))
+      ))
+#+end_src
+
+#+RESULTS:
+
+#+begin_src clojure :results silent
+;; basically succeeds if you remove fun-mode middleware
+ (q/defsketch wrong-number-of-args-passed-fn
+      :size [640 360]
+      :middleware [quil.middleware/pause-on-error]
+      :setup (fn my-setup [] (do (q/translate 40, 40) (q/background 0)))
+      :draw (fn my-draw [] (dorun (apply q/ellipse (repeatedly 4 #(q/random 20 120))))
+      ))
+#+end_src
+
+#+begin_src clojure :results output
+;; whoa, randomness   
+ (q/defsketch wrong-number-of-args-passed-fn
+      :size [640 360]
+      :middleware [quil.middleware/fun-mode quil.middleware/pause-on-error]
+      :setup (fn my-setup [] (do (q/translate 40, 40) (q/background 0)))
+      :draw (fn my-draw [state] (do (q/fill (q/random 255)) (dorun (apply q/ellipse (repeatedly 4 #(q/random 20 120)))))
+      ))
+#+end_src
+
+#+begin_src clojure :results output
+;; whoa, randomness   
+ (q/defsketch wrong-number-of-args-passed-fn
+      :size [640 360]
+      :middleware [quil.middleware/fun-mode quil.middleware/pause-on-error]
+      :setup (fn my-setup [] (do (q/background 0)))
+      :draw (fn my-draw [state] (do (apply q/translate (repeatedly 2 #(q/random 20 320))) (q/fill (q/random 255)) (dorun (apply q/ellipse (repeatedly 4 #(q/random 20 40)))))
+      ))
+#+end_src
+
+#+begin_src clojure :results output
+;; whoa, randomness   
+ (q/defsketch wrong-number-of-args-passed-fn
+      :size [640 360]
+      :middleware [quil.middleware/fun-mode quil.middleware/pause-on-error]
+      :setup (fn my-setup [] (do (q/background 0)))
+      :draw (fn my-draw [state] (do (q/translate (q/random 20 600) (q/random 20 320)) (q/fill (q/random 255)) (dorun (apply q/ellipse (repeatedly 4 #(q/random 20 40)))))
+      ))
+#+end_src
+
+#+RESULTS:
+** trying out pause-on-error with rows-of-dots
+#+begin_src clojure
+  ;; succeeds! (IN SPITE OF ITSELF!) (must have fun-mode turned-off)
+  (q/defsketch rows-of-dots
+  :size [640 640]
+  :middleware [quil.middleware/pause-on-error]
+  :setup #(q/stroke-weight 8) 
+  :draw (fn [] (dorun (for [x (range 0 480 20)]
+		  (dorun (for [y (range 0 120 40)] (q/point x y))))))
+  )
+#+end_src
+
+#+begin_src clojure
+  ;; succeeds! (IN SPITE OF ITSELF!)
+  (q/defsketch rows-of-dots
+  :size [640 640]
+  :middleware [quil.middleware/fun-mode quil.middleware/pause-on-error]
+  :setup #(q/stroke-weight 8) 
+  :draw (fn [state] (dorun (for [x (range 0 480 20)]
+		  (dorun (for [y (range 0 120 40)] (q/point x y))))))
+  )
+#+end_src
+
+#+RESULTS:
+: #'quilbabel.dynamic/rows-of-dots
+
+: #'quilbabel.dynamic/rows-of-dots
+
+Why does the above change the namespace when called as a babel-block
+#+begin_src clojure :results value
+*ns*
+#+end_src
+
+#+RESULTS:
+: #namespace[quilbabel.dynamic]
+
+
+#+begin_src clojure :results value
+(in-ns 'quilbabel.core)
+*ns*
+#+end_src
+
+#+RESULTS:
+: #namespace[quilbabel.core]#namespace[quilbabel.core]
+
+#+begin_src clojure :results silent
+(defn blank [] ())
+#+end_src
+* using fun-mode
+** test out update functions
+#+begin_src clojure
+;; use update with inc to get bigger
+    (q/defsketch diagonals1
+    :size [480 120]
+    :setup #(do (q/frame-rate 1) {:x 0 :y 0 :r 1})
+    :draw (fn my-draw [state] (q/background 255) (q/ellipse 20 20 (:r state) (:r state)))
+    :update (fn my-update [state] (update-in state [:r] inc))
+    :middleware [m/fun-mode m/pause-on-error]
+  )
+#+end_src
+
+#+RESULTS:
+: #'quilbabel.core/diagonals1
+
+#+begin_src clojure
+  ;; use update with inc to get bigger
+  (q/defsketch diagonals1
+    :size [480 120]
+    :setup #(do (q/ellipse-mode :corner) (q/frame-rate 30) {:x 0 :y 0 :r 1})
+    :draw (fn my-draw [state]
+	    (q/background 255)
+	    (q/ellipse (q/map-range (q/sin (:r state)) -1 1 0 (- (q/width) 30)), 
+		       (q/map-range (q/sin (:r state)) -1 1 0 (- (q/height) 30)), 30, 30))
+    :update (fn my-update [state] (update-in state [:r] #(+ 0.1 %)))
+    :middleware [m/fun-mode m/pause-on-error]
+    )
+#+end_src
+
+#+RESULTS:
+: #'quilbabel.core/diagonals1
