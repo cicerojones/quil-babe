@@ -1,4 +1,256 @@
-*  Oh, do ~:reload~ my friends
+* various administrative notes and experiments
+   :PROPERTIES:
+   :VISIBILITY: folded
+   :END:
+** hide testing misc. clojure blocks
+
+#+begin_src clojure
+(for [n (range 5)] (rand-int 8))
+#+end_src
+
+#+RESULTS:
+| 6 | 7 | 5 | 6 | 4 |
+
+
+
+#+begin_src clojure :results output
+(loop [n [1 2 3] x [10 100 1000]] (println (clojure.string/join [(first x) (first n)])) (if (empty? n) nil (recur (rest n) (rest x))))
+#+end_src
+
+
+#+begin_src clojure
+*ns*
+#+end_src
+
+#+RESULTS:
+: #namespace[quilbabel.dynamic]
+
+
+
+#+begin_src clojure :results output
+(clojure.repl/dir quilbabel.dynamic)
+#+end_src
+
+#+RESULTS:
+: diagonals3
+: draw
+: setup
+** your loaded libs
+Pretty-print! (an impressively long and vaguely helpful list)
+#+begin_src clojure :results value pp
+(loaded-libs)
+#+end_src
+
+#+RESULTS:
+#+begin_example
+#{cider.inlined-deps.cljs-tooling.v0v2v0.cljs-tooling.complete
+  cider.inlined-deps.cljs-tooling.v0v2v0.cljs-tooling.info
+  cider.inlined-deps.cljs-tooling.v0v2v0.cljs-tooling.util.analysis
+  cider.inlined-deps.cljs-tooling.v0v2v0.cljs-tooling.util.misc
+  cider.inlined-deps.compliment.v0v3v4.compliment.context
+  cider.inlined-deps.compliment.v0v3v4.compliment.core
+  cider.inlined-deps.compliment.v0v3v4.compliment.sources
+  cider.inlined-deps.compliment.v0v3v4.compliment.sources.class-members
+  cider.inlined-deps.compliment.v0v3v4.compliment.sources.keywords
+  cider.inlined-deps.compliment.v0v3v4.compliment.sources.local-bindings
+  cider.inlined-deps.compliment.v0v3v4.compliment.sources.namespaces-and-classes
+  cider.inlined-deps.compliment.v0v3v4.compliment.sources.ns-mappings
+  cider.inlined-deps.compliment.v0v3v4.compliment.sources.resources
+  cider.inlined-deps.compliment.v0v3v4.compliment.sources.special-forms
+  cider.inlined-deps.compliment.v0v3v4.compliment.utils
+  cider.inlined-deps.javaclasspath.v0v2v3.clojure.java.classpath
+  cider.inlined-deps.toolsnamespace.v0v3v0-alpha3.clojure.tools.namespace.dependency
+  cider.inlined-deps.toolsnamespace.v0v3v0-alpha3.clojure.tools.namespace.file
+  cider.inlined-deps.toolsnamespace.v0v3v0-alpha3.clojure.tools.namespace.find
+  cider.inlined-deps.toolsnamespace.v0v3v0-alpha3.clojure.tools.namespace.parse
+  cider.inlined-deps.toolsnamespace.v0v3v0-alpha3.clojure.tools.namespace.track
+  cider.inlined-deps.toolsreader.v1v0v0.clojure.tools.reader
+  cider.inlined-deps.toolsreader.v1v0v0.clojure.tools.reader.default-data-readers
+  cider.inlined-deps.toolsreader.v1v0v0.clojure.tools.reader.impl.commons
+  cider.inlined-deps.toolsreader.v1v0v0.clojure.tools.reader.impl.utils
+  cider.inlined-deps.toolsreader.v1v0v0.clojure.tools.reader.reader-types
+  cider.nrepl cider.nrepl.middleware.complete
+  cider.nrepl.middleware.debug cider.nrepl.middleware.info
+  cider.nrepl.middleware.inspect cider.nrepl.middleware.ns
+  cider.nrepl.middleware.out cider.nrepl.middleware.pprint
+  cider.nrepl.middleware.stacktrace cider.nrepl.middleware.track-state
+  cider.nrepl.middleware.util.cljs
+  cider.nrepl.middleware.util.error-handling
+  cider.nrepl.middleware.util.inspect
+  cider.nrepl.middleware.util.instrument
+  cider.nrepl.middleware.util.java
+  cider.nrepl.middleware.util.java.parser
+  cider.nrepl.middleware.util.meta cider.nrepl.middleware.util.misc
+  cider.nrepl.middleware.util.namespace
+  cider.nrepl.middleware.util.spec cider.nrepl.print-method
+  cider.nrepl.version clj-native.callbacks clj-native.direct
+  clj-native.direct-util clj-native.functions clj-native.structs
+  clj-native.unions clojure.core.protocols clojure.core.server
+  clojure.data.json clojure.edn clojure.instant clojure.java.browse
+  clojure.java.io clojure.java.javadoc clojure.java.shell clojure.main
+  clojure.pprint clojure.reflect clojure.repl clojure.set
+  clojure.stacktrace clojure.string clojure.template clojure.test
+  clojure.tools.nrepl clojure.tools.nrepl.ack
+  clojure.tools.nrepl.bencode clojure.tools.nrepl.middleware
+  clojure.tools.nrepl.middleware.interruptible-eval
+  clojure.tools.nrepl.middleware.load-file
+  clojure.tools.nrepl.middleware.pr-values
+  clojure.tools.nrepl.middleware.session clojure.tools.nrepl.misc
+  clojure.tools.nrepl.server clojure.tools.nrepl.transport clojure.uuid
+  clojure.walk clojure.zip complete.core dynapath.defaults
+  dynapath.dynamic-classpath dynapath.util org.satta.glob
+  overtone.algo.chance overtone.algo.fn overtone.algo.lists
+  overtone.algo.scaling overtone.algo.trig overtone.api overtone.at-at
+  overtone.byte-spec overtone.config.file-store overtone.config.log
+  overtone.config.store overtone.helpers.audio-file
+  overtone.helpers.doc overtone.helpers.file overtone.helpers.hash
+  overtone.helpers.lib overtone.helpers.map overtone.helpers.math
+  overtone.helpers.ns overtone.helpers.old-contrib overtone.helpers.ref
+  overtone.helpers.seq overtone.helpers.stereo overtone.helpers.string
+  overtone.helpers.synth overtone.helpers.system overtone.helpers.zip
+  overtone.jna-path overtone.libs.app-icon overtone.libs.asset
+  overtone.libs.asset.store overtone.libs.boot-msg
+  overtone.libs.counters overtone.libs.deps overtone.libs.event
+  overtone.libs.handlers overtone.live overtone.midi
+  overtone.music.pitch overtone.music.rhythm overtone.music.time
+  overtone.music.tuning overtone.nativescsynth.availability
+  overtone.osc overtone.osc.decode overtone.osc.dyn-vars
+  overtone.osc.encode overtone.osc.pattern overtone.osc.peer
+  overtone.osc.util overtone.repl.debug overtone.repl.examples
+  overtone.repl.graphviz overtone.repl.inst overtone.repl.shell
+  overtone.repl.ugens overtone.samples.freesound
+  overtone.samples.freesound.search-results
+  overtone.samples.freesound.url overtone.sc.bindings
+  overtone.sc.buffer overtone.sc.bus overtone.sc.cgens.audio-in
+  overtone.sc.cgens.beq-suite overtone.sc.cgens.berlach
+  overtone.sc.cgens.bhob overtone.sc.cgens.buf-io
+  overtone.sc.cgens.demand overtone.sc.cgens.dyn overtone.sc.cgens.env
+  overtone.sc.cgens.freq overtone.sc.cgens.fx overtone.sc.cgens.info
+  overtone.sc.cgens.io overtone.sc.cgens.line overtone.sc.cgens.mix
+  overtone.sc.cgens.oscillators overtone.sc.cgens.tap overtone.sc.clock
+  overtone.sc.defaults overtone.sc.defcgen overtone.sc.dyn-vars
+  overtone.sc.envelope overtone.sc.example
+  overtone.sc.examples.audio-in overtone.sc.examples.blackrain
+  overtone.sc.examples.compander overtone.sc.examples.demand
+  overtone.sc.examples.dyn overtone.sc.examples.membrane
+  overtone.sc.examples.osc overtone.sc.examples.trig
+  overtone.sc.examples.vosim overtone.sc.foundation-groups
+  overtone.sc.info overtone.sc.machinery.allocator
+  overtone.sc.machinery.defexample overtone.sc.machinery.server.args
+  overtone.sc.machinery.server.comms
+  overtone.sc.machinery.server.connection
+  overtone.sc.machinery.server.native
+  overtone.sc.machinery.server.osc-validator
+  overtone.sc.machinery.synthdef overtone.sc.machinery.ugen.categories
+  overtone.sc.machinery.ugen.check overtone.sc.machinery.ugen.common
+  overtone.sc.machinery.ugen.defaults overtone.sc.machinery.ugen.doc
+  overtone.sc.machinery.ugen.fn-gen
+  overtone.sc.machinery.ugen.intern-ns
+  overtone.sc.machinery.ugen.metadata.basicops
+  overtone.sc.machinery.ugen.metadata.beq-suite
+  overtone.sc.machinery.ugen.metadata.binaryopugen
+  overtone.sc.machinery.ugen.metadata.buf-io
+  overtone.sc.machinery.ugen.metadata.chaos
+  overtone.sc.machinery.ugen.metadata.compander
+  overtone.sc.machinery.ugen.metadata.control
+  overtone.sc.machinery.ugen.metadata.delay
+  overtone.sc.machinery.ugen.metadata.demand
+  overtone.sc.machinery.ugen.metadata.envgen
+  overtone.sc.machinery.ugen.metadata.extras.ay
+  overtone.sc.machinery.ugen.metadata.extras.bat
+  overtone.sc.machinery.ugen.metadata.extras.bbcut2u
+  overtone.sc.machinery.ugen.metadata.extras.berlach
+  overtone.sc.machinery.ugen.metadata.extras.bhob
+  overtone.sc.machinery.ugen.metadata.extras.blackrain
+  overtone.sc.machinery.ugen.metadata.extras.distortion
+  overtone.sc.machinery.ugen.metadata.extras.glitch
+  overtone.sc.machinery.ugen.metadata.extras.mda
+  overtone.sc.machinery.ugen.metadata.extras.membrane
+  overtone.sc.machinery.ugen.metadata.extras.sl
+  overtone.sc.machinery.ugen.metadata.extras.stk
+  overtone.sc.machinery.ugen.metadata.extras.tju
+  overtone.sc.machinery.ugen.metadata.extras.vbap
+  overtone.sc.machinery.ugen.metadata.extras.vosim
+  overtone.sc.machinery.ugen.metadata.ff-osc
+  overtone.sc.machinery.ugen.metadata.fft
+  overtone.sc.machinery.ugen.metadata.fft-unpacking
+  overtone.sc.machinery.ugen.metadata.fft2
+  overtone.sc.machinery.ugen.metadata.filter
+  overtone.sc.machinery.ugen.metadata.grain
+  overtone.sc.machinery.ugen.metadata.info
+  overtone.sc.machinery.ugen.metadata.input
+  overtone.sc.machinery.ugen.metadata.io
+  overtone.sc.machinery.ugen.metadata.line
+  overtone.sc.machinery.ugen.metadata.machine-listening
+  overtone.sc.machinery.ugen.metadata.misc
+  overtone.sc.machinery.ugen.metadata.noise
+  overtone.sc.machinery.ugen.metadata.osc
+  overtone.sc.machinery.ugen.metadata.pan
+  overtone.sc.machinery.ugen.metadata.random
+  overtone.sc.machinery.ugen.metadata.trig
+  overtone.sc.machinery.ugen.metadata.unaryopugen
+  overtone.sc.machinery.ugen.sc-ugen
+  overtone.sc.machinery.ugen.special-ops
+  overtone.sc.machinery.ugen.specs overtone.sc.node
+  overtone.sc.protocols overtone.sc.sample overtone.sc.server
+  overtone.sc.synth overtone.sc.trig overtone.sc.ugens overtone.sc.util
+  overtone.sc.vbap overtone.speech overtone.studio.core
+  overtone.studio.fx overtone.studio.inst overtone.studio.midi
+  overtone.studio.midi-player overtone.studio.mixer
+  overtone.studio.scope overtone.studio.util overtone.studio.wavetable
+  overtone.version quil.applet quil.core quil.helpers.applet-listener
+  quil.helpers.docs quil.middleware quil.middlewares.bind-output
+  quil.middlewares.deprecated-options quil.middlewares.fun-mode
+  quil.middlewares.navigation-2d quil.middlewares.navigation-3d
+  quil.middlewares.pause-on-error quil.middlewares.safe-fns quil.sketch
+  quil.util quilbabel.core quilbabel.dynamic}
+#+end_example
+** Processing translation
+README of processing-examples
+[[file:~/org/secondary/processing-examples/README.org::*babel%20sandbox][babel sandbox]]
+** current namespaces
+Why does the namespace sometimes change when calling babel-blocks?
+#+begin_src clojure :results value
+*ns*
+#+end_src
+
+#+RESULTS:
+: #namespace[quilbabel.dynamic]
+
+
+#+begin_src clojure :results value
+(in-ns 'quilbabel.core)
+*ns*
+#+end_src
+
+#+RESULTS:
+: #namespace[quilbabel.core]#namespace[quilbabel.core]
+
+#+begin_src clojure :results silent
+(defn blank [] ())
+#+end_src
+** noise-grid for iterative distraction
+#+begin_src clojure :results silent
+;; pray for helpful iterating distraction
+(require '[quil.helpers.seqs :as qs])
+(require '[quil.helpers.calc :as qc])
+
+(q/defsketch noise-grid
+:size [300 300]
+ :setup #(do (q/smooth) (dorun
+
+   (let [x-start (q/random 10)
+         y-start (q/random 10)]
+     (for [y (qs/range-incl (q/height))
+           x (qs/range-incl (q/width))]
+       (let [x-noise (qc/mul-add x 0.01 x-start)
+             y-noise (qc/mul-add y 0.01 y-start)
+             alph    (* 255 (q/noise x-noise y-noise))]
+         (q/stroke-int 0 alph)
+         (q/line x y (inc x) (inc y))))))))
+#+end_src
+* initial experiments based on wiki examples
+Oh, do ~:reload~ my friends
 ** first passes
 *** deal with namespaces
   :PROPERTIES:
@@ -296,8 +548,8 @@ Can I dynamically
 
 #+RESULTS:
 : nil
-* changing frame rates dynamically?
-
+** changing frame rates dynamically?
+*** use "reload" option
 Will run the sketch ~quil-example~ in quilbabel/src/quilbabel/core.clj
 #+begin_src clojure :results silent :show-process t
 (use :reload 'quilbabel.core)
@@ -316,7 +568,7 @@ But, no matter how much you want to change the frame-rate from setup, it appears
 
 #+RESULTS:
 : #'quilbabel.dynamic/setup
-* use anonymous functions in defsketch for quick experiments
+* use anonymous functions in defsketch
   :PROPERTIES:
   :ID:       828D0FC4-0291-4FE4-B457-CF3DD7864E27
   :END:
@@ -621,206 +873,6 @@ ellipse(268, 118, 200, 200);  // Blue circle
 
 #+RESULTS:
 : #'quilbabel.dynamic/diagonals3
-
-* testing misc. clojure blocks
-#+begin_src clojure
-(for [n (range 5)] (rand-int 8))
-#+end_src
-
-#+RESULTS:
-| 6 | 7 | 5 | 6 | 4 |
-
-
-#+begin_src clojure
-*ns*
-#+end_src
-
-#+RESULTS:
-: #namespace[quilbabel.dynamic]
-
-#+begin_src clojure :results output
-(clojure.repl/dir quilbabel.dynamic)
-#+end_src
-
-#+RESULTS:
-: diagonals3
-: draw
-: setup
-
-Pretty-print! (an impressively long and vaguely helpful list)
-#+begin_src clojure :results value pp
-(loaded-libs)
-#+end_src
-
-#+RESULTS:
-#+begin_example
-#{cider.inlined-deps.cljs-tooling.v0v2v0.cljs-tooling.complete
-  cider.inlined-deps.cljs-tooling.v0v2v0.cljs-tooling.info
-  cider.inlined-deps.cljs-tooling.v0v2v0.cljs-tooling.util.analysis
-  cider.inlined-deps.cljs-tooling.v0v2v0.cljs-tooling.util.misc
-  cider.inlined-deps.compliment.v0v3v4.compliment.context
-  cider.inlined-deps.compliment.v0v3v4.compliment.core
-  cider.inlined-deps.compliment.v0v3v4.compliment.sources
-  cider.inlined-deps.compliment.v0v3v4.compliment.sources.class-members
-  cider.inlined-deps.compliment.v0v3v4.compliment.sources.keywords
-  cider.inlined-deps.compliment.v0v3v4.compliment.sources.local-bindings
-  cider.inlined-deps.compliment.v0v3v4.compliment.sources.namespaces-and-classes
-  cider.inlined-deps.compliment.v0v3v4.compliment.sources.ns-mappings
-  cider.inlined-deps.compliment.v0v3v4.compliment.sources.resources
-  cider.inlined-deps.compliment.v0v3v4.compliment.sources.special-forms
-  cider.inlined-deps.compliment.v0v3v4.compliment.utils
-  cider.inlined-deps.javaclasspath.v0v2v3.clojure.java.classpath
-  cider.inlined-deps.toolsnamespace.v0v3v0-alpha3.clojure.tools.namespace.dependency
-  cider.inlined-deps.toolsnamespace.v0v3v0-alpha3.clojure.tools.namespace.file
-  cider.inlined-deps.toolsnamespace.v0v3v0-alpha3.clojure.tools.namespace.find
-  cider.inlined-deps.toolsnamespace.v0v3v0-alpha3.clojure.tools.namespace.parse
-  cider.inlined-deps.toolsnamespace.v0v3v0-alpha3.clojure.tools.namespace.track
-  cider.inlined-deps.toolsreader.v1v0v0.clojure.tools.reader
-  cider.inlined-deps.toolsreader.v1v0v0.clojure.tools.reader.default-data-readers
-  cider.inlined-deps.toolsreader.v1v0v0.clojure.tools.reader.impl.commons
-  cider.inlined-deps.toolsreader.v1v0v0.clojure.tools.reader.impl.utils
-  cider.inlined-deps.toolsreader.v1v0v0.clojure.tools.reader.reader-types
-  cider.nrepl cider.nrepl.middleware.complete
-  cider.nrepl.middleware.debug cider.nrepl.middleware.info
-  cider.nrepl.middleware.inspect cider.nrepl.middleware.ns
-  cider.nrepl.middleware.out cider.nrepl.middleware.pprint
-  cider.nrepl.middleware.stacktrace cider.nrepl.middleware.track-state
-  cider.nrepl.middleware.util.cljs
-  cider.nrepl.middleware.util.error-handling
-  cider.nrepl.middleware.util.inspect
-  cider.nrepl.middleware.util.instrument
-  cider.nrepl.middleware.util.java
-  cider.nrepl.middleware.util.java.parser
-  cider.nrepl.middleware.util.meta cider.nrepl.middleware.util.misc
-  cider.nrepl.middleware.util.namespace
-  cider.nrepl.middleware.util.spec cider.nrepl.print-method
-  cider.nrepl.version clj-native.callbacks clj-native.direct
-  clj-native.direct-util clj-native.functions clj-native.structs
-  clj-native.unions clojure.core.protocols clojure.core.server
-  clojure.data.json clojure.edn clojure.instant clojure.java.browse
-  clojure.java.io clojure.java.javadoc clojure.java.shell clojure.main
-  clojure.pprint clojure.reflect clojure.repl clojure.set
-  clojure.stacktrace clojure.string clojure.template clojure.test
-  clojure.tools.nrepl clojure.tools.nrepl.ack
-  clojure.tools.nrepl.bencode clojure.tools.nrepl.middleware
-  clojure.tools.nrepl.middleware.interruptible-eval
-  clojure.tools.nrepl.middleware.load-file
-  clojure.tools.nrepl.middleware.pr-values
-  clojure.tools.nrepl.middleware.session clojure.tools.nrepl.misc
-  clojure.tools.nrepl.server clojure.tools.nrepl.transport clojure.uuid
-  clojure.walk clojure.zip complete.core dynapath.defaults
-  dynapath.dynamic-classpath dynapath.util org.satta.glob
-  overtone.algo.chance overtone.algo.fn overtone.algo.lists
-  overtone.algo.scaling overtone.algo.trig overtone.api overtone.at-at
-  overtone.byte-spec overtone.config.file-store overtone.config.log
-  overtone.config.store overtone.helpers.audio-file
-  overtone.helpers.doc overtone.helpers.file overtone.helpers.hash
-  overtone.helpers.lib overtone.helpers.map overtone.helpers.math
-  overtone.helpers.ns overtone.helpers.old-contrib overtone.helpers.ref
-  overtone.helpers.seq overtone.helpers.stereo overtone.helpers.string
-  overtone.helpers.synth overtone.helpers.system overtone.helpers.zip
-  overtone.jna-path overtone.libs.app-icon overtone.libs.asset
-  overtone.libs.asset.store overtone.libs.boot-msg
-  overtone.libs.counters overtone.libs.deps overtone.libs.event
-  overtone.libs.handlers overtone.live overtone.midi
-  overtone.music.pitch overtone.music.rhythm overtone.music.time
-  overtone.music.tuning overtone.nativescsynth.availability
-  overtone.osc overtone.osc.decode overtone.osc.dyn-vars
-  overtone.osc.encode overtone.osc.pattern overtone.osc.peer
-  overtone.osc.util overtone.repl.debug overtone.repl.examples
-  overtone.repl.graphviz overtone.repl.inst overtone.repl.shell
-  overtone.repl.ugens overtone.samples.freesound
-  overtone.samples.freesound.search-results
-  overtone.samples.freesound.url overtone.sc.bindings
-  overtone.sc.buffer overtone.sc.bus overtone.sc.cgens.audio-in
-  overtone.sc.cgens.beq-suite overtone.sc.cgens.berlach
-  overtone.sc.cgens.bhob overtone.sc.cgens.buf-io
-  overtone.sc.cgens.demand overtone.sc.cgens.dyn overtone.sc.cgens.env
-  overtone.sc.cgens.freq overtone.sc.cgens.fx overtone.sc.cgens.info
-  overtone.sc.cgens.io overtone.sc.cgens.line overtone.sc.cgens.mix
-  overtone.sc.cgens.oscillators overtone.sc.cgens.tap overtone.sc.clock
-  overtone.sc.defaults overtone.sc.defcgen overtone.sc.dyn-vars
-  overtone.sc.envelope overtone.sc.example
-  overtone.sc.examples.audio-in overtone.sc.examples.blackrain
-  overtone.sc.examples.compander overtone.sc.examples.demand
-  overtone.sc.examples.dyn overtone.sc.examples.membrane
-  overtone.sc.examples.osc overtone.sc.examples.trig
-  overtone.sc.examples.vosim overtone.sc.foundation-groups
-  overtone.sc.info overtone.sc.machinery.allocator
-  overtone.sc.machinery.defexample overtone.sc.machinery.server.args
-  overtone.sc.machinery.server.comms
-  overtone.sc.machinery.server.connection
-  overtone.sc.machinery.server.native
-  overtone.sc.machinery.server.osc-validator
-  overtone.sc.machinery.synthdef overtone.sc.machinery.ugen.categories
-  overtone.sc.machinery.ugen.check overtone.sc.machinery.ugen.common
-  overtone.sc.machinery.ugen.defaults overtone.sc.machinery.ugen.doc
-  overtone.sc.machinery.ugen.fn-gen
-  overtone.sc.machinery.ugen.intern-ns
-  overtone.sc.machinery.ugen.metadata.basicops
-  overtone.sc.machinery.ugen.metadata.beq-suite
-  overtone.sc.machinery.ugen.metadata.binaryopugen
-  overtone.sc.machinery.ugen.metadata.buf-io
-  overtone.sc.machinery.ugen.metadata.chaos
-  overtone.sc.machinery.ugen.metadata.compander
-  overtone.sc.machinery.ugen.metadata.control
-  overtone.sc.machinery.ugen.metadata.delay
-  overtone.sc.machinery.ugen.metadata.demand
-  overtone.sc.machinery.ugen.metadata.envgen
-  overtone.sc.machinery.ugen.metadata.extras.ay
-  overtone.sc.machinery.ugen.metadata.extras.bat
-  overtone.sc.machinery.ugen.metadata.extras.bbcut2u
-  overtone.sc.machinery.ugen.metadata.extras.berlach
-  overtone.sc.machinery.ugen.metadata.extras.bhob
-  overtone.sc.machinery.ugen.metadata.extras.blackrain
-  overtone.sc.machinery.ugen.metadata.extras.distortion
-  overtone.sc.machinery.ugen.metadata.extras.glitch
-  overtone.sc.machinery.ugen.metadata.extras.mda
-  overtone.sc.machinery.ugen.metadata.extras.membrane
-  overtone.sc.machinery.ugen.metadata.extras.sl
-  overtone.sc.machinery.ugen.metadata.extras.stk
-  overtone.sc.machinery.ugen.metadata.extras.tju
-  overtone.sc.machinery.ugen.metadata.extras.vbap
-  overtone.sc.machinery.ugen.metadata.extras.vosim
-  overtone.sc.machinery.ugen.metadata.ff-osc
-  overtone.sc.machinery.ugen.metadata.fft
-  overtone.sc.machinery.ugen.metadata.fft-unpacking
-  overtone.sc.machinery.ugen.metadata.fft2
-  overtone.sc.machinery.ugen.metadata.filter
-  overtone.sc.machinery.ugen.metadata.grain
-  overtone.sc.machinery.ugen.metadata.info
-  overtone.sc.machinery.ugen.metadata.input
-  overtone.sc.machinery.ugen.metadata.io
-  overtone.sc.machinery.ugen.metadata.line
-  overtone.sc.machinery.ugen.metadata.machine-listening
-  overtone.sc.machinery.ugen.metadata.misc
-  overtone.sc.machinery.ugen.metadata.noise
-  overtone.sc.machinery.ugen.metadata.osc
-  overtone.sc.machinery.ugen.metadata.pan
-  overtone.sc.machinery.ugen.metadata.random
-  overtone.sc.machinery.ugen.metadata.trig
-  overtone.sc.machinery.ugen.metadata.unaryopugen
-  overtone.sc.machinery.ugen.sc-ugen
-  overtone.sc.machinery.ugen.special-ops
-  overtone.sc.machinery.ugen.specs overtone.sc.node
-  overtone.sc.protocols overtone.sc.sample overtone.sc.server
-  overtone.sc.synth overtone.sc.trig overtone.sc.ugens overtone.sc.util
-  overtone.sc.vbap overtone.speech overtone.studio.core
-  overtone.studio.fx overtone.studio.inst overtone.studio.midi
-  overtone.studio.midi-player overtone.studio.mixer
-  overtone.studio.scope overtone.studio.util overtone.studio.wavetable
-  overtone.version quil.applet quil.core quil.helpers.applet-listener
-  quil.helpers.docs quil.middleware quil.middlewares.bind-output
-  quil.middlewares.deprecated-options quil.middlewares.fun-mode
-  quil.middlewares.navigation-2d quil.middlewares.navigation-3d
-  quil.middlewares.pause-on-error quil.middlewares.safe-fns quil.sketch
-  quil.util quilbabel.core quilbabel.dynamic}
-#+end_example
-
-* Processing translation
-README of processing-examples
-[[file:~/org/secondary/processing-examples/README.org::*babel%20sandbox][babel sandbox]]
-
 * text and typography practice
 
 ** simplest
@@ -832,6 +884,7 @@ README of processing-examples
   )
 #+end_src
 ** use Letter.pde model from Processing Basics
+*** failed attempts
 #+begin_src clojure :results silent
   (q/defsketch texty
     :size [640, 360]
@@ -853,16 +906,6 @@ README of processing-examples
 )
 #+end_src
 
-
-#+begin_src clojure :results silent
-  (q/defsketch diagonals3
-    :size [480 120]
-    :setup #(loop [n 20] 
-	      (q/line n 40 (+ (* 8 n) 60) 80)
-	      (if (> n 40) nil (recur (inc n)))
-	      ))
-#+end_src
-
 #+begin_src clojure :results silent
   (q/defsketch texty
     :size [640, 360]
@@ -875,7 +918,17 @@ README of processing-examples
 		   (q/text letter, x, y)))))
 	     (if (> counter 98) nil (recur (inc counter)))))
 #+end_src
-
+*** use loop and recur to draw diagonals
+#+begin_src clojure :results silent
+  (q/defsketch diagonals3
+    :size [480 120]
+    :setup #(loop [n 20] 
+	      (q/line n 40 (+ (* 8 n) 60) 80)
+	      (if (> n 40) nil (recur (inc n)))
+	      ))
+#+end_src
+*** draw a single character
+Putting the q/text call in draw doesn't use the font-created??
 #+begin_src clojure :results silent
 (q/defsketch simpler-text
 :size [640, 360]
@@ -884,6 +937,7 @@ README of processing-examples
 )
 #+end_src
 
+Why is using setup for all drawing is better?
 #+begin_src clojure :results silent :session *cider-repl quilbabel*
 (q/defsketch simpler-text
 :size [640, 360]
@@ -891,13 +945,17 @@ README of processing-examples
 )
 #+end_src
 
+Draw a random-character
 #+begin_src clojure :results silent :session *cider-repl quilbabel*
-(q/defsketch simpler-text
-:size [640, 360]
-:setup #(do (q/text-font (q/create-font "data/SourceCodePro-Regular.ttf" 24)) (q/text (str (char (+ 35 (rand-int 94)))) 600, 40))
-)
+  (q/defsketch simpler-text
+    :size [640, 360]
+    :setup #(do (q/text-font (q/create-font "data/SourceCodePro-Regular.ttf" 24)) 
+		(q/text (str (char (+ 35 (rand-int 94)))) 600, 40))
+    )
 #+end_src
 
+*** Two characters 
+on top of one another with loop
 #+begin_src clojure :results silent
   (q/defsketch simpler-text
   :size [640, 360]
@@ -906,6 +964,7 @@ README of processing-examples
   )
 #+end_src
 
+Spread out
 #+begin_src clojure :results silent
   (q/defsketch simpler-text
   :size [640, 360]
@@ -916,6 +975,7 @@ README of processing-examples
     )
 #+end_src
 
+Multiple characters on top of one another in multiple locations 
 #+begin_src clojure :results silent
   (q/defsketch simpler-text
     :size [640, 360]
@@ -927,7 +987,7 @@ README of processing-examples
 
 #+end_src
 
-
+No difference
 #+begin_src clojure :results silent
     (q/defsketch simpler-text
       :size [640, 360]
@@ -939,9 +999,7 @@ README of processing-examples
 
 #+end_src
 
-#+begin_src clojure :results output
-(loop [n [1 2 3] x [10 100 1000]] (println (clojure.string/join [(first x) (first n)])) (if (empty? n) nil (recur (rest n) (rest x))))
-#+end_src
+
 
 #+RESULTS:
 : 101
@@ -950,11 +1008,15 @@ README of processing-examples
 : 
 
 
+*** Two different characters (Complains because...)
 #+begin_src clojure :results silent
-    (q/defsketch simpler-text
-      :size [640, 360]
-      :setup #(do (q/background 0) (q/text-font (q/create-font "data/SourceCodePro-Regular.ttf" 24)) (loop [x [580 600] letter [65 66]] (q/text (str (char (first letter))) (first x), 40) (if (empty? x) nil (recur (rest x) (rest letter)))))
-)
+      (q/defsketch simpler-text
+	:size [640, 360]
+	:setup #(do (q/background 0) (q/text-font (q/create-font "data/SourceCodePro-Regular.ttf" 24))
+		    (loop [x [580 600] letter [65 66]]
+		      (q/text (str (char (first letter))) (first x), 40)
+		      (if (empty? x) nil (recur (rest x) (rest letter)))))
+  )
 #+end_src
 
 #+begin_src clojure :results silent
@@ -983,7 +1045,8 @@ README of processing-examples
 #+end_src
 
 
-
+*** dot and dots
+**** Single dot
 #+begin_src clojure
 ;; succeeds!
 (q/defsketch diagonals1
@@ -995,7 +1058,7 @@ README of processing-examples
 
 #+RESULTS:
 : #'quilbabel.dynamic/diagonals1
-
+**** Line of dots
 #+begin_src clojure
 ;; succeeds!
 (q/defsketch dots
@@ -1007,7 +1070,7 @@ README of processing-examples
 
 #+RESULTS:
 : #'quilbabel.dynamic/dots
-
+**** 2D lines of dots
 #+begin_src clojure
   ;; succeeds!
   (q/defsketch rows-of-dots
@@ -1033,10 +1096,10 @@ README of processing-examples
 
 #+RESULTS:
 : #'quilbabel.dynamic/rows-of-dots
-
+**** please rows of letters (no.)
 #+begin_src clojure
 ;; works not so good
-  (q/defsketch rows-of-dots
+  (q/defsketch rows-of-letters
     :size [480 120]
     :setup #(do (q/background 0) (q/text-font (q/create-font "data/SourceCodePro-Regular.ttf" 24)))
     :draw (fn [](dorun
@@ -1051,25 +1114,7 @@ README of processing-examples
 
 #+RESULTS:
 : #'quilbabel.dynamic/rows-of-dots
-#+begin_src clojure :results silent
-;; pray for helpful iterating distraction
-(require '[quil.helpers.seqs :as qs])
-(require '[quil.helpers.calc :as qc])
 
-(q/defsketch noise-grid
-:size [300 300]
- :setup #(do (q/smooth) (dorun
-
-   (let [x-start (q/random 10)
-         y-start (q/random 10)]
-     (for [y (qs/range-incl (q/height))
-           x (qs/range-incl (q/width))]
-       (let [x-noise (qc/mul-add x 0.01 x-start)
-             y-noise (qc/mul-add y 0.01 y-start)
-             alph    (* 255 (q/noise x-noise y-noise))]
-         (q/stroke-int 0 alph)
-         (q/line x y (inc x) (inc y))))))))
-#+end_src
 
 #+begin_src clojure
   ;; prints all on top of one place??
@@ -1088,7 +1133,7 @@ README of processing-examples
 
 #+RESULTS:
 : #'quilbabel.dynamic/rows-of-dots
-
+**** will print letters (and complain)
 #+begin_src clojure :results silent
 ;; prints but one letter do to not using dorun
   (q/defsketch rows-of-dots
@@ -1107,8 +1152,7 @@ README of processing-examples
 		(q/text-font (q/create-font "data/SourceCodePro-Regular.ttf" 24))
 (dorun (map #(q/text (str (char %1)) %2 %3) (range 65 69) [40 200 360 480] [20 50 80 110])))))
 #+end_src
-
-
+**** testing out map
 #+begin_src clojure :results value scalar
 (map #(q/text (str (char %1)) %2)  (range 65 75) (for [y [40 80 120] x [20 240 460]] (vector y x)))
 (map #(cons %1 %2) (range 65 75) (for [y [40 80 120] x [20 240 460]] (vector y x)))
@@ -1132,6 +1176,7 @@ README of processing-examples
 (map (fn [coll] (apply #(q/text (str (char (first coll)) (second coll) (third coll))))) (map #(cons %1 %2) (range 65 75) (for [y [40 80 120] x [20 240 460]] (vector y x))))
 #+end_src
 
+Does nothing
 #+begin_src clojure :results silent
   ;; not really
   (q/defsketch rows-of-dots
@@ -1141,7 +1186,7 @@ README of processing-examples
 			      (fn [coll] (apply #(q/text (str (char (first coll)) (second coll) (nth coll 2)))))
 			      (map #(cons %1 %2) (range 65 75) (for [y [40 80 120] x [20 240 460]] (vector y x)))) ))))
 #+end_src
-
+**** Three dots and complains
 #+begin_src clojure :results silent
   ;; hmm
   (q/defsketch rows-of-dots
@@ -1162,9 +1207,7 @@ README of processing-examples
 				    (apply q/point coll))
 				  (for [y [40 80 120] x [20 240 460]] (vector x y)))))))
 #+end_src
-
-
-
+**** rows and grids with ~map~ function (mostly problems)
 #+begin_src clojure :results silent
   ;; ahh! something
   (q/defsketch rows-of-dots
@@ -1175,6 +1218,7 @@ README of processing-examples
 				  (for [y (range 20 220 20) x (range 20 460 20)] (vector x y)))))))
 #+end_src
 
+A problem with parens?
 #+begin_src clojure :results silent
 
   (q/defsketch rows-of-letterz
@@ -1182,7 +1226,7 @@ README of processing-examples
     :setup (fn [] (do (q/text-font (q/create-font "data/SourceCodePro-Regular.ttf" 24))
 		      (dorun (map (fn [coll]
 				    (apply #(q/text (str (char %1)) %2 %3) coll)
-				    (for [y (range 20 220 20) x (range 20 460 20)] (vector x y)))))))
+				    (for [y (range 20 220 20) x (range 20 460 20)] (vector x y))))))))
 #+end_src
 
 #+begin_src clojure :results silent
@@ -1195,6 +1239,7 @@ README of processing-examples
 #+end_src
 
 
+Nothing
 #+begin_src clojure :results silent
 
   (q/defsketch rows-of-letterz
@@ -1233,7 +1278,7 @@ README of processing-examples
 		    (for [y (range 20 220 20) x (range 20 460 20)] (vector x y))))))
 		(q/background 0)))
 #+end_src
-** doesn't use the font created with create-font??
+** doesn't use the font created with create-font?? (using :draw)
 #+begin_src clojure :results silent
 ;;; uhhhh, ok
 
@@ -1274,7 +1319,9 @@ Don't call me plezz
 #+end_src
 ** Basically reproduces original drawing template (missing color changes)!
 Uses a ~dorun~ in ~setup~ to create a complicated ~map~-ing scheme with anonymous functions
+
 #+begin_src clojure :results silent
+;; still complains
 (q/defsketch something
   :size [660 360]
   :setup #(do (q/text-font (q/create-font "data/SourceCodePro-Regular.ttf" 24))
@@ -1294,6 +1341,7 @@ Uses a ~dorun~ in ~setup~ to create a complicated ~map~-ing scheme with anonymou
 
 Set the background color to black and accurately replicate the "gap" and "margins" of the original
 #+begin_src clojure :results silent
+;; still complain
 (q/defsketch something
   :size [640 360]
   :setup #(do (q/translate 40, 40) (q/background 0) (q/text-font (q/create-font "data/SourceCodePro-Regular.ttf" 24))
@@ -1380,9 +1428,10 @@ Running the text-drawing block from within draw somehow fails to load the font a
 #+RESULTS:
 
 If you include fun-mode, you need to pass state!!??
-** using ~doseq~ for side-effects?
+* using ~doseq~ for side-effects?
 
-
+** simpler examples
+*** draw points
 #+begin_src clojure
 ;; succeeds!
 (q/defsketch diagonals1
@@ -1392,6 +1441,10 @@ If you include fun-mode, you need to pass state!!??
 )
 #+end_src
 
+#+RESULTS:
+: #'quilbabel.dynamic/diagonals1
+
+*** Animates random "points"
 #+begin_src clojure
 ;; succeeds!
 (q/defsketch diagonals1
@@ -1401,6 +1454,10 @@ If you include fun-mode, you need to pass state!!??
 )
 #+end_src
 
+#+RESULTS:
+: #'quilbabel.dynamic/diagonals1
+
+*** lots of small points
 #+begin_src clojure
 ;; succeeds!
 (q/defsketch diagonals1
@@ -1413,6 +1470,7 @@ If you include fun-mode, you need to pass state!!??
 #+RESULTS:
 : #'quilbabel.dynamic/diagonals1
 
+*** lots of ellipses time
 #+begin_src clojure :results silent
 (q/defsketch diagonals1
 :size [480 120]
@@ -1451,8 +1509,11 @@ If you include fun-mode, you need to pass state!!??
   )
 #+end_src
 
+#+RESULTS:
+: #'quilbabel.dynamic/diagonals1
+
 #+begin_src clojure
-  ;; wigging out with random colors in the draw!
+;; definitely not wigging out (boring random ellipses)
   (q/defsketch diagonals1
   :size [480 120]
   :setup #(q/frame-rate 1) ;; #(q/ellipse-mode (rand-nth [:radius :center :corner]))
@@ -1460,24 +1521,10 @@ If you include fun-mode, you need to pass state!!??
 )
 #+end_src
 
-
-
-
-
 #+RESULTS:
 : #'quilbabel.dynamic/diagonals1
 
-#+begin_src clojure :results silent
-;; paints all sectors with all characters
-(q/defsketch doseqs-pleazz
-:size [640 360]
-:middleware [quil.middleware/pause-on-error]
-:setup (fn my-setup [] (q/translate 40, 40) (q/background 0) (q/text-font (q/create-font "data/SourceCodePro-Regular.ttf" 24)))
-:draw #(dorun (for [y (range 0 360 35) x (range 0 640 35)] (doseq [n (range 35 110)] (q/text (str (char n)) x y))))
-)
-#+end_src
-
-
+** drawing many ellipses with random values
 #+begin_src clojure
 ;; wigging out with random colors and (random-ellipse mode transformations) in the draw!
 (q/defsketch diagonals1
@@ -1502,7 +1549,6 @@ If you include fun-mode, you need to pass state!!??
 #+RESULTS:
 : #'quilbabel.dynamic/diagonals1
 
-** whoa, randomness
 #+begin_src clojure :results output
 ;; whoa, randomness   
  (q/defsketch wrong-number-of-args-passed-fn
@@ -1512,6 +1558,8 @@ If you include fun-mode, you need to pass state!!??
       :draw (fn my-draw [state] (dorun (apply q/ellipse (repeatedly 4 #(q/random 20 120))))
       ))
 #+end_src
+
+#+RESULTS:
 
 #+begin_src clojure :results output
 ;; will fail if you remove "state" argument but still include fun-mode middleware
@@ -1545,6 +1593,8 @@ If you include fun-mode, you need to pass state!!??
       ))
 #+end_src
 
+#+RESULTS:
+
 #+begin_src clojure :results output
 ;; whoa, randomness   
  (q/defsketch wrong-number-of-args-passed-fn
@@ -1554,6 +1604,8 @@ If you include fun-mode, you need to pass state!!??
       :draw (fn my-draw [state] (do (apply q/translate (repeatedly 2 #(q/random 20 320))) (q/fill (q/random 255)) (dorun (apply q/ellipse (repeatedly 4 #(q/random 20 40)))))
       ))
 #+end_src
+
+#+RESULTS:
 
 #+begin_src clojure :results output
 ;; whoa, randomness   
@@ -1566,11 +1618,12 @@ If you include fun-mode, you need to pass state!!??
 #+end_src
 
 #+RESULTS:
-** trying out pause-on-error with rows-of-dots
+
+trying out pause-on-error with rows-of-dots
 #+begin_src clojure
   ;; succeeds! (IN SPITE OF ITSELF!) (must have fun-mode turned-off)
   (q/defsketch rows-of-dots
-  :size [640 640]
+  :size [480 120]
   :middleware [quil.middleware/pause-on-error]
   :setup #(q/stroke-weight 8) 
   :draw (fn [] (dorun (for [x (range 0 480 20)]
@@ -1578,23 +1631,39 @@ If you include fun-mode, you need to pass state!!??
   )
 #+end_src
 
-#+begin_src clojure
-  ;; succeeds! (IN SPITE OF ITSELF!)
-  (q/defsketch rows-of-dots
-  :size [640 640]
-  :middleware [quil.middleware/fun-mode quil.middleware/pause-on-error]
-  :setup #(q/stroke-weight 8) 
-  :draw (fn [state] (dorun (for [x (range 0 480 20)]
-		  (dorun (for [y (range 0 120 40)] (q/point x y))))))
-  )
-#+end_src
-
 #+RESULTS:
 : #'quilbabel.dynamic/rows-of-dots
 
-: #'quilbabel.dynamic/rows-of-dots
+** try to replicate "alphabet" example
+#+begin_src clojure :results silent
+;; paints all sectors with all characters
+(q/defsketch doseqs-pleazz
+:size [640 360]
+:middleware [quil.middleware/pause-on-error]
+:setup (fn my-setup [] (q/translate 40, 40) (q/background 0) (q/text-font (q/create-font "data/SourceCodePro-Regular.ttf" 24)))
+:draw #(dorun (for [y (range 0 360 35) x (range 0 640 35)] (doseq [n (range 35 110)] (q/text (str (char n)) x y))))
+)
+#+end_src
 
-Why does the above change the namespace when called as a babel-block
+
+
+
+
+* test out update functions with fun-mode
+Will need to have "m" (as opposed to "quil.middleware"), ya know, =active= somehow.
+
+#+begin_src clojure :results output
+(clojure.repl/doc m/fun-mode)
+#+end_src
+
+#+RESULTS:
+: -------------------------
+: quil.middleware/fun-mode
+: ([options])
+:   Introduces function mode. Adds 'update' function which takes current
+:   state and returns new state. Makes all other functions (setup, draw,
+:   mouse-click, etc) state-aware. See wiki for more details.
+
 #+begin_src clojure :results value
 *ns*
 #+end_src
@@ -1602,36 +1671,20 @@ Why does the above change the namespace when called as a babel-block
 #+RESULTS:
 : #namespace[quilbabel.dynamic]
 
-
-#+begin_src clojure :results value
-(in-ns 'quilbabel.core)
-*ns*
-#+end_src
-
-#+RESULTS:
-: #namespace[quilbabel.core]#namespace[quilbabel.core]
-
-#+begin_src clojure :results silent
-(defn blank [] ())
-#+end_src
-* using fun-mode
-** test out update functions
-#+begin_src clojure
+** circle simply gets bigger with ~inc~ update of radius
+#+begin_src clojure :results silent 
 ;; use update with inc to get bigger
     (q/defsketch diagonals1
     :size [480 120]
-    :setup #(do (q/frame-rate 1) {:x 0 :y 0 :r 1})
+    :setup #(do (q/frame-rate 10) {:x 0 :y 0 :r 1})
     :draw (fn my-draw [state] (q/background 255) (q/ellipse 20 20 (:r state) (:r state)))
     :update (fn my-update [state] (update-in state [:r] inc))
     :middleware [m/fun-mode m/pause-on-error]
   )
 #+end_src
-
-#+RESULTS:
-: #'quilbabel.core/diagonals1
-
-#+begin_src clojure
-  ;; use update with inc to get bigger
+** moves diagonally 
+#+begin_src clojure :results silent
+  ;; map-range using sin values
   (q/defsketch diagonals1
     :size [480 120]
     :setup #(do (q/ellipse-mode :corner) (q/frame-rate 30) {:x 0 :y 0 :r 1})
@@ -1643,6 +1696,381 @@ Why does the above change the namespace when called as a babel-block
     :middleware [m/fun-mode m/pause-on-error]
     )
 #+end_src
+** Uses randomness to change ~counter~ updating amount of black circle
+#+begin_src clojure :results silent
+    ;; map-range using sin values
+    (q/defsketch diagonals1
+      :size [840 120]
+      :setup #(do (q/ellipse-mode :corner) (q/frame-rate 30) {:x 0 :y 0 :counter1 1 :counter2 1 :radius 30 :noiz 1 })
+      :draw (fn my-draw [state]
+  (q/fill 10)
+	      (q/background 255)
+	      (q/ellipse (q/map-range (q/sin (:counter1 state)) -1 1 0 (- (q/width) 30)), 
+			 (q/map-range (q/sin (:counter1 state)) -1 1 0 (- (q/height) 30)), 
+			 (:radius state), 
+			 (:radius state))
+  (q/fill 255)
+	      (q/ellipse (q/map-range (q/sin (:counter2 state)) -1 1 0 (- (q/width) 30)), 
+			 (q/map-range (q/sin (:counter2 state)) -1 1 0 (- (q/height) 30)), 
+			 (:radius state), 
+			 (:radius state))
+)
+      :update (fn my-update [state]
+		(update state :counter1 #(+ (* 0.5 (rand)) 0.1 %))
+		;; (update state :counter2 #(+ (* 0.1 (rand)) 0.1 %))
+		;; (update state :noiz #(+ (rand) %))
+		)
+      :middleware [m/fun-mode m/pause-on-error]
+      )
+#+end_src
+** uses reduce for same basic diagonal
+#+begin_src clojure :results silent
+    ;; map-range using sin values
+    (q/defsketch diagonals1
+      :size [840 120]
+      :setup #(do (q/ellipse-mode :corner) (q/frame-rate 30) {:counter1 1 :counter2 (* 10 (rand)) :radius 30 })
+      :draw (fn my-draw [state]
+  (q/fill 10)
+	      (q/background 255)
+	      (q/ellipse (q/map-range (q/sin (:counter1 state)) -1 1 0 (- (q/width) 30)), 
+			 (q/map-range (q/sin (:counter1 state)) -1 1 0 (- (q/height) 30)), 
+			 (:radius state), 
+			 (:radius state))
+  (q/fill 255)
+	      (q/ellipse (q/map-range (q/sin (:counter2 state)) -1 1 0 (- (q/width) 30)), 
+			 (q/map-range (q/sin (:counter2 state)) -1 1 0 (- (q/height) 30)), 
+			 (:radius state), 
+			 (:radius state))
+)
+      :update (fn my-update [state]
+		(reduce (fn [m k] (update-in m [k] #(+ % 0.1 ))) state [:counter2] )
+		)
+      :middleware [m/fun-mode m/pause-on-error]
+      )
+#+end_src
+** uses ~reduce~ on multiple keys (to get both circles moving)
+#+begin_src clojure :results silent
+    ;; map-range using sin values
+    (q/defsketch diagonals1
+      :size [840 120]
+      :setup #(do (q/ellipse-mode :corner) (q/frame-rate 30) {:x (q/random 20 40) :y (q/random 10 30) :counter1 1 :counter2 1 :radius 30})
+      :draw (fn my-draw [state]
+  (q/fill 10)
+	      (q/background 255)
+	      (q/ellipse (q/map-range (q/sin (:counter1 state)) -1 1 0 (- (q/width) 30)), 
+			 (q/map-range (q/sin (:counter1 state)) -1 1 0 (- (q/height) 30)), 
+			 (:radius state), 
+			 (:radius state))
+  (q/fill 255)
+	      (q/ellipse (+ (:x state) (q/map-range (q/sin (:counter2 state)) -1 1 0 (- (q/width) 30))), 
+			 (+ (:y state) (q/map-range (q/sin (:counter2 state)) -1 1 0 (- (q/height) 30))), 
+			 (:radius state), 
+			 (:radius state))
+)
+      :update (fn my-update [state]
+		(reduce (fn update-all [m k] (update-in m [k] #(+ 0.1 %))) state [:counter1 :counter2] )
+		)
+      :middleware [m/fun-mode m/pause-on-error]
+      )
+#+end_src
+* use midi controller with overtone
+** test and debug MIDI controller (debug-on)
+Why is overtone not always immediately available once "used" in the repl?
+
+#+begin_src clojure :results value
+*ns*
+#+end_src
 
 #+RESULTS:
-: #'quilbabel.core/diagonals1
+: #namespace[quilbabel.dynamic]
+
+#+begin_src clojure :results silent
+(in-ns 'quilbabel.core)
+#+end_src
+
+#+begin_src clojure :results value
+*ns*
+#+end_src
+
+#+BEGIN_SRC clojure :results silent
+(event-debug-on)
+#+END_SRC
+
+** Pad events
+#+begin_src clojure :results silent
+event:  [:midi :note-on] ({:data2 127, :command :note-on, :channel 0, :msg #object[com.sun.media.sound.FastShortMessage 0x268ac78a "com.sun.media.sound.FastShortMessage@268ac78a"], :note 40, :dev-key [:midi-device "M-Audio" "MIDI" "Axiom A.I.R. Mini32 MIDI" 0], :status :note-on, :data1 40, :data2-f 1.0, :device {:description "Axiom A.I.R. Mini32 MIDI", :vendor "M-Audio", :sinks 0, :sources 2147483647, :name "MIDI", :transmitter #object[com.sun.media.sound.MidiInDevice$MidiInTransmitter 0x3e582327 "com.sun.media.sound.MidiInDevice$MidiInTransmitter@3e582327"], :overtone.studio.midi/full-device-key [:midi-device "M-Audio" "MIDI" "Axiom A.I.R. Mini32 MIDI" 0], :info #object[com.sun.media.sound.MidiInDeviceProvider$MidiInDeviceInfo 0x246b2166 "MIDI"], :overtone.studio.midi/dev-num 0, :device #object[com.sun.media.sound.MidiInDevice 0x2025f9a4 "com.sun.media.sound.MidiInDevice@2025f9a4"], :version "Unknown version"}, :timestamp 289681399660, :velocity 127, :velocity-f 1.0}) 
+event:  [:midi-device "M-Audio" "MIDI" "Axiom A.I.R. Mini32 MIDI" 0] ({:data2 127, :command :note-on, :channel 0, :msg #object[com.sun.media.sound.FastShortMessage 0x268ac78a "com.sun.media.sound.FastShortMessage@268ac78a"], :note 40, :dev-key [:midi-device "M-Audio" "MIDI" "Axiom A.I.R. Mini32 MIDI" 0], :status :note-on, :data1 40, :data2-f 1.0, :device {:description "Axiom A.I.R. Mini32 MIDI", :vendor "M-Audio", :sinks 0, :sources 2147483647, :name "MIDI", :transmitter #object[com.sun.media.sound.MidiInDevice$MidiInTransmitter 0x3e582327 "com.sun.media.sound.MidiInDevice$MidiInTransmitter@3e582327"], :overtone.studio.midi/full-device-key [:midi-device "M-Audio" "MIDI" "Axiom A.I.R. Mini32 MIDI" 0], :info #object[com.sun.media.sound.MidiInDeviceProvider$MidiInDeviceInfo 0x246b2166 "MIDI"], :overtone.studio.midi/dev-num 0, :device #object[com.sun.media.sound.MidiInDevice 0x2025f9a4 "com.sun.media.sound.MidiInDevice@2025f9a4"], :version "Unknown version"}, :timestamp 289681399660, :velocity 127, :velocity-f 1.0})
+ 
+event:  (:midi-device "M-Audio" "MIDI" "Axiom A.I.R. Mini32 MIDI" 0 :note-on 40) ({:data2 127, :command :note-on, :channel 0, :msg #object[com.sun.media.sound.FastShortMessage 0x268ac78a "com.sun.media.sound.FastShortMessage@268ac78a"], :note 40, :dev-key [:midi-device "M-Audio" "MIDI" "Axiom A.I.R. Mini32 MIDI" 0], :status :note-on, :data1 40, :data2-f 1.0, :device {:description "Axiom A.I.R. Mini32 MIDI", :vendor "M-Audio", :sinks 0, :sources 2147483647, :name "MIDI", :transmitter #object[com.sun.media.sound.MidiInDevice$MidiInTransmitter 0x3e582327 "com.sun.media.sound.MidiInDevice$MidiInTransmitter@3e582327"], :overtone.studio.midi/full-device-key [:midi-device "M-Audio" "MIDI" "Axiom A.I.R. Mini32 MIDI" 0], :info #object[com.sun.media.sound.MidiInDeviceProvider$MidiInDeviceInfo 0x246b2166 "MIDI"], :overtone.studio.midi/dev-num 0, :device #object[com.sun.media.sound.MidiInDevice 0x2025f9a4 "com.sun.media.sound.MidiInDevice@2025f9a4"], :version "Unknown version"}, :timestamp 289681399660, :velocity 127, :velocity-f 1.0})
+ 
+event:  (:midi-device "M-Audio" "MIDI" "Axiom A.I.R. Mini32 MIDI" 0 :note-on) ({:data2 127, :command :note-on, :channel 0, :msg #object[com.sun.media.sound.FastShortMessage 0x268ac78a "com.sun.media.sound.FastShortMessage@268ac78a"], :note 40, :dev-key [:midi-device "M-Audio" "MIDI" "Axiom A.I.R. Mini32 MIDI" 0], :status :note-on, :data1 40, :data2-f 1.0, :device {:description "Axiom A.I.R. Mini32 MIDI", :vendor "M-Audio", :sinks 0, :sources 2147483647, :name "MIDI", :transmitter #object[com.sun.media.sound.MidiInDevice$MidiInTransmitter 0x3e582327 "com.sun.media.sound.MidiInDevice$MidiInTransmitter@3e582327"], :overtone.studio.midi/full-device-key [:midi-device "M-Audio" "MIDI" "Axiom A.I.R. Mini32 MIDI" 0], :info #object[com.sun.media.sound.MidiInDeviceProvider$MidiInDeviceInfo 0x246b2166 "MIDI"], :overtone.studio.midi/dev-num 0, :device #object[com.sun.media.sound.MidiInDevice 0x2025f9a4 "com.sun.media.sound.MidiInDevice@2025f9a4"], :version "Unknown version"}, :timestamp 289681399660, :velocity 127, :velocity-f 1.0})
+ 
+event:  [:midi :note-off] ({:data2 0, :command :note-off, :channel 0, :msg #object[com.sun.media.sound.FastShortMessage 0x296de226 "com.sun.media.sound.FastShortMessage@296de226"], :note 40, :dev-key [:midi-device "M-Audio" "MIDI" "Axiom A.I.R. Mini32 MIDI" 0], :status :note-on, :data1 40, :data2-f 0.0, :device {:description "Axiom A.I.R. Mini32 MIDI", :vendor "M-Audio", :sinks 0, :sources 2147483647, :name "MIDI", :transmitter #object[com.sun.media.sound.MidiInDevice$MidiInTransmitter 0x3e582327 "com.sun.media.sound.MidiInDevice$MidiInTransmitter@3e582327"], :overtone.studio.midi/full-device-key [:midi-device "M-Audio" "MIDI" "Axiom A.I.R. Mini32 MIDI" 0], :info #object[com.sun.media.sound.MidiInDeviceProvider$MidiInDeviceInfo 0x246b2166 "MIDI"], :overtone.studio.midi/dev-num 0, :device #object[com.sun.media.sound.MidiInDevice 0x2025f9a4 "com.sun.media.sound.MidiInDevice@2025f9a4"], :version "Unknown version"}, :timestamp 289681522587, :velocity 0, :velocity-f 0.0}) 
+event:  [:midi-device "M-Audio" "MIDI" "Axiom A.I.R. Mini32 MIDI" 0] ({:data2 0, :command :note-off, :channel 0, :msg #object[com.sun.media.sound.FastShortMessage 0x296de226 "com.sun.media.sound.FastShortMessage@296de226"], :note 40, :dev-key [:midi-device "M-Audio" "MIDI" "Axiom A.I.R. Mini32 MIDI" 0], :status :note-on, :data1 40, :data2-f 0.0, :device {:description "Axiom A.I.R. Mini32 MIDI", :vendor "M-Audio", :sinks 0, :sources 2147483647, :name "MIDI", :transmitter #object[com.sun.media.sound.MidiInDevice$MidiInTransmitter 0x3e582327 "com.sun.media.sound.MidiInDevice$MidiInTransmitter@3e582327"], :overtone.studio.midi/full-device-key [:midi-device "M-Audio" "MIDI" "Axiom A.I.R. Mini32 MIDI" 0], :info #object[com.sun.media.sound.MidiInDeviceProvider$MidiInDeviceInfo 0x246b2166 "MIDI"], :overtone.studio.midi/dev-num 0, :device #object[com.sun.media.sound.MidiInDevice 0x2025f9a4 "com.sun.media.sound.MidiInDevice@2025f9a4"], :version "Unknown version"}, :timestamp 289681522587, :velocity 0, :velocity-f 0.0})
+ 
+event:  (:midi-device "M-Audio" "MIDI" "Axiom A.I.R. Mini32 MIDI" 0 :note-off 40) ({:data2 0, :command :note-off, :channel 0, :msg #object[com.sun.media.sound.FastShortMessage 0x296de226 "com.sun.media.sound.FastShortMessage@296de226"], :note 40, :dev-key [:midi-device "M-Audio" "MIDI" "Axiom A.I.R. Mini32 MIDI" 0], :status :note-on, :data1 40, :data2-f 0.0, :device {:description "Axiom A.I.R. Mini32 MIDI", :vendor "M-Audio", :sinks 0, :sources 2147483647, :name "MIDI", :transmitter #object[com.sun.media.sound.MidiInDevice$MidiInTransmitter 0x3e582327 "com.sun.media.sound.MidiInDevice$MidiInTransmitter@3e582327"], :overtone.studio.midi/full-device-key [:midi-device "M-Audio" "MIDI" "Axiom A.I.R. Mini32 MIDI" 0], :info #object[com.sun.media.sound.MidiInDeviceProvider$MidiInDeviceInfo 0x246b2166 "MIDI"], :overtone.studio.midi/dev-num 0, :device #object[com.sun.media.sound.MidiInDevice 0x2025f9a4 "com.sun.media.sound.MidiInDevice@2025f9a4"], :version "Unknown version"}, :timestamp 289681522587, :velocity 0, :velocity-f 0.0})
+ 
+event:  (:midi-device "M-Audio" "MIDI" "Axiom A.I.R. Mini32 MIDI" 0 :note-off) ({:data2 0, :command :note-off, :channel 0, :msg #object[com.sun.media.sound.FastShortMessage 0x296de226 "com.sun.media.sound.FastShortMessage@296de226"], :note 40, :dev-key [:midi-device "M-Audio" "MIDI" "Axiom A.I.R. Mini32 MIDI" 0], :status :note-on, :data1 40, :data2-f 0.0, :device {:description "Axiom A.I.R. Mini32 MIDI", :vendor "M-Audio", :sinks 0, :sources 2147483647, :name "MIDI", :transmitter #object[com.sun.media.sound.MidiInDevice$MidiInTransmitter 0x3e582327 "com.sun.media.sound.MidiInDevice$MidiInTransmitter@3e582327"], :overtone.studio.midi/full-device-key [:midi-device "M-Audio" "MIDI" "Axiom A.I.R. Mini32 MIDI" 0], :info #object[com.sun.media.sound.MidiInDeviceProvider$MidiInDeviceInfo 0x246b2166 "MIDI"], :overtone.studio.midi/dev-num 0, :device #object[com.sun.media.sound.MidiInDevice 0x2025f9a4 "com.sun.media.sound.MidiInDevice@2025f9a4"], :version "Unknown version"}, :timestamp 289681522587, :velocity 0, :velocity-f 0.0})
+#+end_src
+
+** Keyboard event
+#+begin_src clojure :results silent
+event:  [:midi :note-on] ({:data2 127, :command :note-on, :channel 0, :msg #object[com.sun.media.sound.FastShortMessage 0xd3a052a "com.sun.media.sound.FastShortMessage@d3a052a"], :note 60, :dev-key [:midi-device "M-Audio" "MIDI" "Axiom A.I.R. Mini32 MIDI" 0], :status :note-on, :data1 60, :data2-f 1.0, :device {:description "Axiom A.I.R. Mini32 MIDI", :vendor "M-Audio", :sinks 0, :sources 2147483647, :name "MIDI", :transmitter #object[com.sun.media.sound.MidiInDevice$MidiInTransmitter 0x3e582327 "com.sun.media.sound.MidiInDevice$MidiInTransmitter@3e582327"], :overtone.studio.midi/full-device-key [:midi-device "M-Audio" "MIDI" "Axiom A.I.R. Mini32 MIDI" 0], :info #object[com.sun.media.sound.MidiInDeviceProvider$MidiInDeviceInfo 0x246b2166 "MIDI"], :overtone.studio.midi/dev-num 0, :device #object[com.sun.media.sound.MidiInDevice 0x2025f9a4 "com.sun.media.sound.MidiInDevice@2025f9a4"], :version "Unknown version"}, :timestamp 290020673088, :velocity 127, :velocity-f 1.0}) 
+event:  [:midi-device "M-Audio" "MIDI" "Axiom A.I.R. Mini32 MIDI" 0] ({:data2 127, :command :note-on, :channel 0, :msg #object[com.sun.media.sound.FastShortMessage 0xd3a052a "com.sun.media.sound.FastShortMessage@d3a052a"], :note 60, :dev-key [:midi-device "M-Audio" "MIDI" "Axiom A.I.R. Mini32 MIDI" 0], :status :note-on, :data1 60, :data2-f 1.0, :device {:description "Axiom A.I.R. Mini32 MIDI", :vendor "M-Audio", :sinks 0, :sources 2147483647, :name "MIDI", :transmitter #object[com.sun.media.sound.MidiInDevice$MidiInTransmitter 0x3e582327 "com.sun.media.sound.MidiInDevice$MidiInTransmitter@3e582327"], :overtone.studio.midi/full-device-key [:midi-device "M-Audio" "MIDI" "Axiom A.I.R. Mini32 MIDI" 0], :info #object[com.sun.media.sound.MidiInDeviceProvider$MidiInDeviceInfo 0x246b2166 "MIDI"], :overtone.studio.midi/dev-num 0, :device #object[com.sun.media.sound.MidiInDevice 0x2025f9a4 "com.sun.media.sound.MidiInDevice@2025f9a4"], :version "Unknown version"}, :timestamp 290020673088, :velocity 127, :velocity-f 1.0})
+ 
+event:  (:midi-device "M-Audio" "MIDI" "Axiom A.I.R. Mini32 MIDI" 0 :note-on 60) ({:data2 127, :command :note-on, :channel 0, :msg #object[com.sun.media.sound.FastShortMessage 0xd3a052a "com.sun.media.sound.FastShortMessage@d3a052a"], :note 60, :dev-key [:midi-device "M-Audio" "MIDI" "Axiom A.I.R. Mini32 MIDI" 0], :status :note-on, :data1 60, :data2-f 1.0, :device {:description "Axiom A.I.R. Mini32 MIDI", :vendor "M-Audio", :sinks 0, :sources 2147483647, :name "MIDI", :transmitter #object[com.sun.media.sound.MidiInDevice$MidiInTransmitter 0x3e582327 "com.sun.media.sound.MidiInDevice$MidiInTransmitter@3e582327"], :overtone.studio.midi/full-device-key [:midi-device "M-Audio" "MIDI" "Axiom A.I.R. Mini32 MIDI" 0], :info #object[com.sun.media.sound.MidiInDeviceProvider$MidiInDeviceInfo 0x246b2166 "MIDI"], :overtone.studio.midi/dev-num 0, :device #object[com.sun.media.sound.MidiInDevice 0x2025f9a4 "com.sun.media.sound.MidiInDevice@2025f9a4"], :version "Unknown version"}, :timestamp 290020673088, :velocity 127, :velocity-f 1.0})
+ 
+event:  (:midi-device "M-Audio" "MIDI" "Axiom A.I.R. Mini32 MIDI" 0 :note-on) ({:data2 127, :command :note-on, :channel 0, :msg #object[com.sun.media.sound.FastShortMessage 0xd3a052a "com.sun.media.sound.FastShortMessage@d3a052a"], :note 60, :dev-key [:midi-device "M-Audio" "MIDI" "Axiom A.I.R. Mini32 MIDI" 0], :status :note-on, :data1 60, :data2-f 1.0, :device {:description "Axiom A.I.R. Mini32 MIDI", :vendor "M-Audio", :sinks 0, :sources 2147483647, :name "MIDI", :transmitter #object[com.sun.media.sound.MidiInDevice$MidiInTransmitter 0x3e582327 "com.sun.media.sound.MidiInDevice$MidiInTransmitter@3e582327"], :overtone.studio.midi/full-device-key [:midi-device "M-Audio" "MIDI" "Axiom A.I.R. Mini32 MIDI" 0], :info #object[com.sun.media.sound.MidiInDeviceProvider$MidiInDeviceInfo 0x246b2166 "MIDI"], :overtone.studio.midi/dev-num 0, :device #object[com.sun.media.sound.MidiInDevice 0x2025f9a4 "com.sun.media.sound.MidiInDevice@2025f9a4"], :version "Unknown version"}, :timestamp 290020673088, :velocity 127, :velocity-f 1.0})
+ 
+event:  [:midi :note-off] ({:data2 0, :command :note-off, :channel 0, :msg #object[com.sun.media.sound.FastShortMessage 0x30b2b93e "com.sun.media.sound.FastShortMessage@30b2b93e"], :note 60, :dev-key [:midi-device "M-Audio" "MIDI" "Axiom A.I.R. Mini32 MIDI" 0], :status :note-on, :data1 60, :data2-f 0.0, :device {:description "Axiom A.I.R. Mini32 MIDI", :vendor "M-Audio", :sinks 0, :sources 2147483647, :name "MIDI", :transmitter #object[com.sun.media.sound.MidiInDevice$MidiInTransmitter 0x3e582327 "com.sun.media.sound.MidiInDevice$MidiInTransmitter@3e582327"], :overtone.studio.midi/full-device-key [:midi-device "M-Audio" "MIDI" "Axiom A.I.R. Mini32 MIDI" 0], :info #object[com.sun.media.sound.MidiInDeviceProvider$MidiInDeviceInfo 0x246b2166 "MIDI"], :overtone.studio.midi/dev-num 0, :device #object[com.sun.media.sound.MidiInDevice 0x2025f9a4 "com.sun.media.sound.MidiInDevice@2025f9a4"], :version "Unknown version"}, :timestamp 290020740010, :velocity 0, :velocity-f 0.0}) 
+event:  [:midi-device "M-Audio" "MIDI" "Axiom A.I.R. Mini32 MIDI" 0] ({:data2 0, :command :note-off, :channel 0, :msg #object[com.sun.media.sound.FastShortMessage 0x30b2b93e "com.sun.media.sound.FastShortMessage@30b2b93e"], :note 60, :dev-key [:midi-device "M-Audio" "MIDI" "Axiom A.I.R. Mini32 MIDI" 0], :status :note-on, :data1 60, :data2-f 0.0, :device {:description "Axiom A.I.R. Mini32 MIDI", :vendor "M-Audio", :sinks 0, :sources 2147483647, :name "MIDI", :transmitter #object[com.sun.media.sound.MidiInDevice$MidiInTransmitter 0x3e582327 "com.sun.media.sound.MidiInDevice$MidiInTransmitter@3e582327"], :overtone.studio.midi/full-device-key [:midi-device "M-Audio" "MIDI" "Axiom A.I.R. Mini32 MIDI" 0], :info #object[com.sun.media.sound.MidiInDeviceProvider$MidiInDeviceInfo 0x246b2166 "MIDI"], :overtone.studio.midi/dev-num 0, :device #object[com.sun.media.sound.MidiInDevice 0x2025f9a4 "com.sun.media.sound.MidiInDevice@2025f9a4"], :version "Unknown version"}, :timestamp 290020740010, :velocity 0, :velocity-f 0.0})
+ 
+event:  (:midi-device "M-Audio" "MIDI" "Axiom A.I.R. Mini32 MIDI" 0 :note-off 60) ({:data2 0, :command :note-off, :channel 0, :msg #object[com.sun.media.sound.FastShortMessage 0x30b2b93e "com.sun.media.sound.FastShortMessage@30b2b93e"], :note 60, :dev-key [:midi-device "M-Audio" "MIDI" "Axiom A.I.R. Mini32 MIDI" 0], :status :note-on, :data1 60, :data2-f 0.0, :device {:description "Axiom A.I.R. Mini32 MIDI", :vendor "M-Audio", :sinks 0, :sources 2147483647, :name "MIDI", :transmitter #object[com.sun.media.sound.MidiInDevice$MidiInTransmitter 0x3e582327 "com.sun.media.sound.MidiInDevice$MidiInTransmitter@3e582327"], :overtone.studio.midi/full-device-key [:midi-device "M-Audio" "MIDI" "Axiom A.I.R. Mini32 MIDI" 0], :info #object[com.sun.media.sound.MidiInDeviceProvider$MidiInDeviceInfo 0x246b2166 "MIDI"], :overtone.studio.midi/dev-num 0, :device #object[com.sun.media.sound.MidiInDevice 0x2025f9a4 "com.sun.media.sound.MidiInDevice@2025f9a4"], :version "Unknown version"}, :timestamp 290020740010, :velocity 0, :velocity-f 0.0})
+ 
+event:  (:midi-device "M-Audio" "MIDI" "Axiom A.I.R. Mini32 MIDI" 0 :note-off) ({:data2 0, :command :note-off, :channel 0, :msg #object[com.sun.media.sound.FastShortMessage 0x30b2b93e "com.sun.media.sound.FastShortMessage@30b2b93e"], :note 60, :dev-key [:midi-device "M-Audio" "MIDI" "Axiom A.I.R. Mini32 MIDI" 0], :status :note-on, :data1 60, :data2-f 0.0, :device {:description "Axiom A.I.R. Mini32 MIDI", :vendor "M-Audio", :sinks 0, :sources 2147483647, :name "MIDI", :transmitter #object[com.sun.media.sound.MidiInDevice$MidiInTransmitter 0x3e582327 "com.sun.media.sound.MidiInDevice$MidiInTransmitter@3e582327"], :overtone.studio.midi/full-device-key [:midi-device "M-Audio" "MIDI" "Axiom A.I.R. Mini32 MIDI" 0], :info #object[com.sun.media.sound.MidiInDeviceProvider$MidiInDeviceInfo 0x246b2166 "MIDI"], :overtone.studio.midi/dev-num 0, :device #object[com.sun.media.sound.MidiInDevice 0x2025f9a4 "com.sun.media.sound.MidiInDevice@2025f9a4"], :version "Unknown version"}, :timestamp 290020740010, :velocity 0, :velocity-f 0.0})
+#+end_src
+
+** debug-off
+#+BEGIN_SRC clojure :results silent
+(event-debug-off)
+#+END_SRC
+
+** "println" event-handlers for control-change and note-on events
+#+begin_src clojure :results silent
+   (on-event [:midi :control-change]
+             (fn [{cc-channel :note vel :velocity chan :channel}]
+	       (println (list cc-channel vel chan)))
+	       ::list-all-cc)
+#+end_src
+
+#+begin_src clojure :results silent
+   (on-event [:midi :note-on]
+             (fn [{pad :note vel :velocity}]
+	       (println (list pad vel)))
+	       ::list-all-pads)
+#+end_src
+
+ #+BEGIN_SRC clojure :results silent
+ (remove-event-handler ::list-all)
+ (remove-event-handler ::list-all-pads)
+ #+END_SRC
+
+** create (very shitty) circle-size controller!
+Requires a state-ful atom below:
+#+begin_src clojure :results silent
+(def rad-atom (atom 1.0))
+
+#+end_src
+
+Must have started-up overtone!
+
+#+begin_src clojure :results silent
+  (on-event [:midi :control-change]
+	    (fn [{cc-channel :note vel :velocity}]
+	      (case cc-channel
+		1 (do (println (list cc-channel vel @rad-atom)) (swap! rad-atom #(+ % (* 0.01 vel))))
+		2 (do (println (list cc-channel vel @rad-atom)) (swap! rad-atom #(- % (* 0.01 vel))))))
+	    ::a-rad-swapper)
+
+#+end_src
+
+#+begin_src clojure :results silent
+  (on-event [:midi :note-on]
+	    (fn [{pad :note vel :velocity}]
+	      (case pad
+		48 (println (list pad vel (with-precision 4 @rad-atom)))
+		36 (do (reset! rad-atom 0) (println (list pad vel @rad-atom)))
+		37 (do (reset! rad-atom 0) (println (list pad vel @rad-atom)))
+		38 (do (reset! rad-atom 0) (println (list pad vel @rad-atom)))
+		39 (do (reset! rad-atom 0) (println (list pad vel @rad-atom)))
+		40 (do (swap! rad-atom #(+ % (* 0.01 vel))) (println (list pad vel @rad-atom)))
+		41 (do (swap! rad-atom #(+ % (* 0.1 vel))) (println (list pad vel @rad-atom)))
+		42 (do (swap! rad-atom #(- % (* 0.01 vel))) (println (list pad vel @rad-atom)))
+		43 (do (swap! rad-atom #(- % (* 0.1 vel))) (println (list pad vel @rad-atom)))
+		;; 37 (do (println (list pad vel @rad-atom)) (swap! rad-atom #(- % (* 0.1 vel)))))
+		))
+	    ::a-pad-resetter)
+
+#+end_src
+
+
+
+ #+BEGIN_SRC clojure :results silent
+ (remove-event-handler ::a-rad-swapper)
+ (remove-event-handler ::a-pad-resetter)
+ #+END_SRC
+
+#+begin_src clojure :results silent
+(q/defsketch diagonals1
+:size [480 120]
+:setup #(q/ellipse 132, 82, @rad-atom))
+#+end_src
+
+#+begin_src clojure :results silent 
+;; use update with inc to get bigger
+    (q/defsketch diagonals1
+    :size [900 300]
+    :setup #(do (q/frame-rate 10) {:x 0 :y 0 :r 1})
+    :draw (fn my-draw [state] (q/background 255) (q/ellipse 20 20 (:r state) (:r state)))
+    :update (fn my-update [state] (update-in state [:r] #(+ % @rad-atom)))
+    :middleware [m/fun-mode m/pause-on-error]
+  )
+#+end_src
+
+** improved circle-size controller
+#+begin_src clojure :results silent
+  (on-event [:midi :note-on]
+	    (fn [{pad :note vel :velocity}]
+	      (let [n (format "%.2f" @rad-atom)]
+		(case pad
+		  79 (println (list pad n))
+		  36 (do (reset! rad-atom 0.001) (println (list pad  n)))
+		  37 (do (reset! rad-atom 0.001) (println (list pad  n)))
+		  38 (do (reset! rad-atom 0.001) (println (list pad  n)))
+		  39 (do (reset! rad-atom 0.001) (println (list pad  n)))
+		  40 (do (swap! rad-atom #(+ % (* 0.01 vel))) (println (list pad vel n)))
+		  41 (do (swap! rad-atom #(+ % (* 0.1 vel))) (println (list pad vel n)))
+		  42 (do (swap! rad-atom #(- % (* 0.01 vel))) (println (list pad vel n)))
+		  43 (do (swap! rad-atom #(- % (* 0.1 vel))) (println (list pad vel n)))
+		  ;; 37 (do (println (list pad vel n)) (swap! rad-atom #(- % (* 0.1 vel)))))
+		  )))
+	    ::a-pad-resetter)
+
+#+end_src
+
+#+begin_src clojure :results silent 
+;; use update with inc to get bigger
+    (q/defsketch diagonals1
+    :size [900 300]
+    :setup #(do (q/frame-rate 10) {:x 0 :y 0 :r 1})
+    :draw (fn my-draw [state] (q/background 255) (q/ellipse 20 20 (:r state) (:r state)))
+    :update (fn my-update [state] (update-in state [:r] (fn [_] (identity @rad-atom))))
+    :middleware [m/fun-mode m/pause-on-error]
+  )
+#+end_src
+
+#+begin_src clojure :results silent
+(reset! rad-atom 0.001)
+
+@rad-atom
+#+end_src
+
+** control text display
+
+*** simple
+#+begin_src clojure :results silent
+(q/defsketch texty
+:size [480, 120]
+:setup #(q/text-font (q/create-font "SourceCodePro-Regular.ttf" 24))
+:draw #(do (q/text-size 48) (q/text "YO Adrian" 100, 50))
+  )
+#+end_src
+
+*** develop a scrolling "ticker" example
+#+begin_src clojure :results silent
+(def am-str-long "It is my contention that organizing a pedagogical practice around this notion of three \"languages,\" which babble together wherever artists rely heavily on digital technology, offers better prospects for artists and the arts more generally in an age in thrall to STEM.")
+(def am-str-short "It is my contention that organizing a pedagogical")
+(def words (clojure.string/split am-str-long #" "))
+#+end_src
+
+#+begin_src clojure :results silent
+(q/defsketch texty
+:size [480, 120]
+:middleware [m/pause-on-error]
+:setup #(q/text-font (q/create-font "Arial" 24))
+:draw #(do (q/text-size 48) (q/text am-str-long 100, 50))
+  )
+#+end_src
+
+Works!
+#+begin_src clojure :results silent
+(q/defsketch texty
+:size [480, 120]
+:middleware [m/pause-on-error m/fun-mode]
+:setup #(do (q/text-font (q/create-font "Arial" 24)) {:x 450 :y 60 :r 1})
+:draw (fn my-draw [state] (q/background 128) (q/text-size 48) (q/text am-str-short (:x state) (:y state)))
+:update (fn my-update [state] (update-in state [:x] #(- % (:r state))))
+  )
+#+end_src
+
+*** use atoms and controller
+
+
+#+begin_src clojure :results silent
+(def rate (atom 0.1))
+
+#+end_src
+
+#+begin_src clojure :results silent
+(q/defsketch texty
+:size [480, 120]
+:middleware [m/pause-on-error m/fun-mode]
+:setup #(do (q/text-font (q/create-font "Arial" 24)) {:x 450 :y 60 :r @rate})
+:draw (fn my-draw [state] (q/background 128) (q/text-size 48) (q/text am-str-long (:x state) (:y state)))
+:update (fn my-update [state] (update-in state [:x] #(- % (* 0.1 @rate))))
+  )
+#+end_src
+
+#+begin_src clojure :results silent
+  (on-event [:midi :note-on]
+	    (fn [{pad :note vel :velocity}]
+	      (let [n (format "%.2f" @rate)]
+		(case pad
+		  79 (println (list pad n))
+		  36 (do (reset! rate 0.001) (println (list pad n)))
+		  37 (do (reset! rate 0.001) (println (list pad n)))
+		  38 (do (reset! rate 0.001) (println (list pad n)))
+		  39 (do (reset! rate 0.001) (println (list pad n)))
+		  40 (do (swap! rate #(+ % (* 0.01 vel))) (println (list pad vel n)))
+		  41 (do (swap! rate #(+ % (* 0.1 vel))) (println (list pad vel n)))
+		  42 (do (swap! rate #(- % (* 0.01 vel))) (println (list pad vel n)))
+		  43 (do (swap! rate #(- % (* 0.1 vel))) (println (list pad vel n)))
+		  ;; 37 (do (println (list pad vel n)) (swap! rate #(- % (* 0.1 vel)))))
+		  )))
+	    ::a-pad-resetter)
+
+#+end_src
+
+ #+BEGIN_SRC clojure :results silent
+ (remove-event-handler ::a-pad-resetter)
+ #+END_SRC
+
+* overtone sounds
+
+** some background noise
+#+begin_src clojure :results silent
+  (demo 10 (* (+ (bpf (sin-osc (+ 400 (* 100 (lf-noise1:kr)))) 400 1)
+		  (pink-noise)) (+ 5 (* 0.5 (sin-osc:kr 2)))))
+
+#+end_src
+
+
+#+begin_src clojure :results silent
+  (demo 60 (g-verb (sum
+		    (map #(blip
+			   (* (midicps
+			       (duty:kr % 0 (dseq [24 27 31 36 41] INF)))
+			      %2)
+			   (mul-add:kr (lf-noise1:kr 1/2) 3 4))
+			 [1 1/2 1/4]
+			 [1 4 8]))
+		   200
+		   8))
+#+end_src
+
+[
+[24 28 31 35 39]
+[24 27 31 35 38]
+#+begin_src clojure :results silent
+  (demo 15 (* 0.5 (g-verb (sum
+		    (map #(blip
+			   (* (midicps
+			       (duty:kr % 0 (dseq [24 28 31 35 38 42 45 49 52 56 59 63] INF)))
+			      %2)
+			   (mul-add:kr (lf-noise1:kr 0.1) 6 8))
+			 [4 2 1]
+			 ;; [1 1/2 1/4]
+			 [1 4 8]))
+			 100
+		   4)))
+#+end_src
