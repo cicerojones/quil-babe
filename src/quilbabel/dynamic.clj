@@ -1,6 +1,7 @@
 (ns quilbabel.dynamic
-  (:require [quil.core :as q]))
-
+  (:require [quil.core :as q]
+            [quilbabel.dynamic :as dynamic]
+            [quil.middleware :as m]))
 
 
 ;; (defn setup []
