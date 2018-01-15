@@ -2179,3 +2179,143 @@ Works!
 			 100
 		   4)))
 #+end_src
+
+* tweening
+
+** whew, finally
+
+*** practicing reduce
+Not quite tweening, but uses a (for now, complicated) reduce
+
+#+begin_src clojure :results silent
+  (q/defsketch tweens 
+  :size [420, 120]
+  :middleware [m/pause-on-error m/fun-mode]
+  :setup (fn my-setup [] (q/frame-rate 60) {:start-x 20, :start-y 30, :stop-x 160, :stop-y 80,
+	      :x 20, :y 30,
+	      :step 0.005 :pct 0.0})
+  :draw (fn my-draw [state] (do (q/background 0) (q/ellipse (:x state) (:y state) 20 20)))
+:update (fn my-update [state] (reduce (fn update-all [m k] (update m k #(+ % 0.5))) state [:x :y]))
+  )
+#+end_src
+
+*** use a ~case~ in a reduce
+Conditionally apply different version of a function in a reduce
+#+begin_src clojure :results silent
+    (q/defsketch tweens 
+    :size [420, 120]
+    :middleware [m/pause-on-error m/fun-mode]
+    :setup (fn my-setup [] (q/frame-rate 60) {:start-x 20, :start-y 30, :stop-x 160, :stop-y 80,
+		:x 20, :y 30,
+		:step 0.005 :pct 0.0})
+    :draw (fn my-draw [state] (do (q/background 0) (q/ellipse (:x state) (:y state) 20 20)))
+      :update (fn my-update [state]
+		(reduce (fn update-all [m k]
+			  (case k
+			    :x (update m k #(+ % 0.5))
+			    :y (update m k #(+ % 0.1)))) state [:x :y]))
+    )
+#+end_src
+
+*** change the amount you add to y in each step
+Ha! Exponential falling down??
+#+begin_src clojure :results silent
+    (q/defsketch tweens 
+    :size [420, 120]
+    :middleware [m/pause-on-error m/fun-mode]
+    :setup (fn my-setup [] (q/frame-rate 60) {:start-x 20, :start-y 30, :stop-x 160, :stop-y 80,
+		:x 20, :y 30,
+		:step 0.005 :pct 0.0})
+    :draw (fn my-draw [state] (do (q/background 0) (q/ellipse (:x state) (:y state) 20 20)))
+      :update (fn my-update [state]
+		(reduce (fn update-all [m k]
+			  (case k
+			    :x (update m k #(+ % 0.5))
+			    :y (update m k #(+ % (:pct state)))
+			    (update m k #(+ % 0.01)))) state [:x :y :pct]))
+    )
+#+end_src
+
+*** try to replicate full steps of original
+#+begin_src clojure :results silent
+    (q/defsketch tweens 
+    :size [620, 120]
+    :middleware [m/pause-on-error m/fun-mode]
+    :setup (fn my-setup [] (q/frame-rate 60) {:start-x 20, :start-y 30, :stop-x 160, :stop-y 80,
+		:x 20, :y 30,
+		:step 0.005 :pct 0.0})
+    :draw (fn my-draw [state] (do (q/background 0) (q/ellipse (:x state) (:y state) 20 20)))
+      :update (fn my-update [state]
+		(reduce (fn update-all [m k]
+			  (case k
+			    :x (update m k (fn x-update [_] (+ (:start-x state) (* (- (:stop-x state) (:start-x state)) (:pct state)))))
+			    :y (update m k (fn y-update [_] (+ (:start-y state) (* (- (:stop-y state) (:start-y state)) (:pct state)))))
+			    (update m k #(+ % (:step state))))) state [:x :y :pct]))
+    )
+#+end_src
+
+Hmm, problems occur once pct reaches 1.0?
+#+begin_src clojure :results silent
+  (q/defsketch tweens 
+    :size [620, 120]
+    :middleware [m/pause-on-error m/fun-mode]
+    :setup (fn my-setup [] (q/frame-rate 60) {:start-x 20, :start-y 30, :stop-x 160, :stop-y 80,
+					      :x 20, :y 30,
+					      :step 0.005 :pct 0.0})
+    :draw (fn my-draw [state] (do (q/background 0) (q/ellipse (:x state) (:y state) 20 20)))
+    :update (fn my-update [state]
+	      (if (< (:pct state) 1.0) 
+		(reduce (fn update-all [m k]
+			  (case k
+			    :x (update m k (fn x-update [_] (+ (:start-x state) (* (- (:stop-x state) (:start-x state)) (:pct state)))))
+			    :y (update m k (fn y-update [_] (+ (:start-y state) (* (- (:stop-y state) (:start-y state)) (:pct state)))))
+			    (update m k #(+ % (:step state))))) state [:x :y :pct])
+(q/ellipse (:x-stop state) (:y-stop state) 20 20)))
+    )
+#+end_src
+
+Without update, will just statically draw
+#+begin_src clojure :results silent
+  (q/defsketch tweens 
+    :size [620, 120]
+    :middleware [m/pause-on-error m/fun-mode]
+    :setup (fn my-setup [] (q/frame-rate 60) {:start-x 20, :start-y 30, :stop-x 160, :stop-y 80,
+					      :x 20, :y 30,
+					      :step 0.005 :pct 0.0})
+    :draw (fn my-draw [state] (do (q/background 0) (q/ellipse (:x state) (:y state) 20 20)))
+    ;; :update (fn my-update [state] (q/ellipse (:x state) (:y state) 20 20))
+    )
+#+end_src
+
+#+begin_src clojure :results silent
+  (q/defsketch tweens 
+    :size [620, 120]
+    :middleware [m/pause-on-error m/fun-mode]
+    :setup (fn my-setup [] (q/frame-rate 60) {:start-x 20, :start-y 30, :stop-x 160, :stop-y 80,
+					      :x 20, :y 30,
+					      :step 0.005 :pct 0.0})
+    :draw (fn my-draw [state] (do (q/background 0) (q/ellipse (:x state) (:y state) 20 20)))
+    :update (fn my-update [state] (identity state))
+    )
+#+end_src
+
+
+Two cheers for ~identity~!
+#+begin_src clojure :results silent
+  (q/defsketch tweens 
+    :size [620, 120]
+    :middleware [m/pause-on-error m/fun-mode]
+    :setup (fn my-setup [] (q/frame-rate 60) {:start-x 20, :start-y 30, :stop-x 160, :stop-y 80,
+					      :x 20, :y 30,
+					      :step 0.005 :pct 0.0})
+    :draw (fn my-draw [state] (do (q/background 0) (q/ellipse (:x state) (:y state) 20 20)))
+    :update (fn my-update [state]
+	      (if (< (:pct state) 1.0) 
+		(reduce (fn update-all [m k]
+			  (case k
+			    :x (update m k (fn x-update [_] (+ (:start-x state) (* (- (:stop-x state) (:start-x state)) (:pct state)))))
+			    :y (update m k (fn y-update [_] (+ (:start-y state) (* (- (:stop-y state) (:start-y state)) (:pct state)))))
+			    (update m k #(+ % (:step state))))) state [:x :y :pct])
+		(identity state)))
+    )
+#+end_src
