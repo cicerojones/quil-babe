@@ -1815,6 +1815,67 @@ Will need to have "m" (as opposed to "quil.middleware"), ya know, =active= someh
       ))
 #+end_src
 ** draw with mouse
+#+begin_src clojure :results silent
+(q/defsketch mousey
+:size [480, 120]
+:middleware [m/pause-on-error]
+:setup #(do (q/fill 0, 102) (q/no-stroke))
+:draw #(q/ellipse (q/mouse-x) (q/mouse-y), 9, 9)
+)
+#+end_src
+
+#+begin_src clojure :results silent
+(q/defsketch mousey
+:size [480, 120]
+:middleware [m/pause-on-error]
+:draw #(do (q/background 204) (q/line 20, 20 , 220, 100)
+(if (q/key-pressed?) (q/line 220, 20, 20, 100)))
+)
+#+end_src
+
+#+begin_src clojure :results silent
+(q/defsketch keyey
+:middleware [m/pause-on-error]
+:size [120, 140]
+:setup #(do (q/text-size 64) (q/text-align :center))
+:draw #(do (q/background 0) (q/text (str (q/raw-key)) 60, 80))
+)
+#+end_src
+** conditionally draw different pictures to the screen based on key-input
+#+begin_src clojure :results silent
+  (q/defsketch keyey
+    :middleware [m/pause-on-error]
+    :size [120, 140]
+    :setup #(do (q/text-size 64) (q/text-align :center))
+    :draw #(let [pic1 (q/load-image "shapez1.jpg")
+		 pic2 (q/load-image "shapez-0002.jpg")] 
+	     (q/background 0) 
+	     (if (q/key-pressed?) (cond (= "k" (str (q/raw-key))) (q/image pic1 20, 0)
+					(= "j" (str (q/raw-key))) (q/image pic2 20, 0))
+		 )))
+
+
+
+#+end_src
+** get the pixel array for letters
+#+begin_src clojure :results silent
+(q/defsketch keyey
+:middleware [m/pause-on-error]
+:size [120, 120]
+:setup #(do (q/text-size 64) (q/text-align :center) (q/text "a" (* 0.5 (q/width)) (* 0.5 (q/height))))
+)
+
+#+end_src
+
+#+begin_src clojure :results silent
+(q/defsketch keyey
+:middleware [m/pause-on-error]
+:size [120, 120]
+:setup #(do (q/text-size 64) (q/text-align :center) (q/text "a" (* 0.5 (q/width)) (* 0.5 (q/height)))
+(q/load-pixels) (def pxls (q/pixels))
+)
+)
+
 #+end_src
 * use midi controller with overtone
 ** test and debug MIDI controller (debug-on)
