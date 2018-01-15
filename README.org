@@ -1771,6 +1771,51 @@ Will need to have "m" (as opposed to "quil.middleware"), ya know, =active= someh
       :middleware [m/fun-mode m/pause-on-error]
       )
 #+end_src
+* various file and i/o
+** failed file loading
+:setup #(do (q/load-image "shapez1.jpg") (q/image "shapez1.jpg" 20, 40))
+** you can live reload quite easily!
+#+begin_src clojure :results silent
+(q/defsketch imagey
+:size [480, 240]
+:middleware [m/pause-on-error]
+:setup setup
+:draw draw
+  )
+#+end_src
+
+#+begin_src clojure :results silent
+(defn setup []
+  "Runs once."
+  (q/smooth)
+  (q/no-stroke)
+  (q/fill 226)
+  (q/frame-rate 10))
+#+end_src
+
+#+begin_src clojure :results silent
+  (defn draw
+    "Example usage of with-translation and with-rotation."
+    []
+    (q/background-float 125)
+  ;; (q/load-image "shapez1.jpg")
+  (q/image (q/load-image "shapez1.jpg")  20, 0)
+  )
+#+end_src
+
+#+begin_src clojure :results silent
+  (defn draw
+    "Example usage of with-translation and with-rotation."
+    []
+    (q/background-float 125)
+    (let [pic1 (q/load-image "shapez1.jpg")
+	  pic2 (q/load-image "shapez-0002.jpg")]
+      (q/image pic1 20, 0)
+      (q/image pic2 140, 0)
+      ))
+#+end_src
+** draw with mouse
+#+end_src
 * use midi controller with overtone
 ** test and debug MIDI controller (debug-on)
 Why is overtone not always immediately available once "used" in the repl?
