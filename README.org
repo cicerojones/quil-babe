@@ -794,18 +794,16 @@ Without an argument...
 
 /Users/ao/scratch/quilbabel/screen-0000.tif
 
-#+begin_src clojure :show-process t
-;; writes to wherever notion of "current directory" is
-  (q/defsketch diagonals3
-    :size [480 120]
-    :setup #(do (q/stroke-weight (rand-int 8))
-		(dorun (for [n (range 20 400 60)] (q/line n 40 (+ n 60) 80)))
-		(q/save-frame)
-    ))
+#+begin_src clojure :results silent
+  ;; writes to wherever notion of "current directory" is
+    (q/defsketch diagonals3
+      :size [480 120]
+      :setup #(do (q/stroke-weight (rand-int 8))
+		  (dorun (for [n (range 20 400 60)] (q/line n 40 (+ n 60) 80)))
+		  ;; (q/save-frame)
+      ))
 #+end_src
 
-#+RESULTS:
-: #'quilbabel.core/diagonals3
 
 #+begin_src clojure
   ;; stroke-weight set just once
@@ -2002,6 +2000,7 @@ Works!
 #+end_src
 
 #+begin_src clojure :results silent
+
 (q/defsketch texty
 :size [480, 120]
 :middleware [m/pause-on-error m/fun-mode]
