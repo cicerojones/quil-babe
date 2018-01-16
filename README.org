@@ -205,6 +205,7 @@ Pretty-print! (an impressively long and vaguely helpful list)
   quil.middlewares.pause-on-error quil.middlewares.safe-fns quil.sketch
   quil.util quilbabel.core quilbabel.dynamic}
 #+end_example
+
 ** Processing translation
 README of processing-examples
 [[file:~/org/secondary/processing-examples/README.org::*babel%20sandbox][babel sandbox]]
@@ -872,7 +873,6 @@ ellipse(268, 118, 200, 200);  // Blue circle
 #+RESULTS:
 : #'quilbabel.dynamic/diagonals3
 * text and typography practice
-
 ** simplest
 #+begin_src clojure :results silent
 (q/defsketch texty
@@ -1832,7 +1832,7 @@ Will need to have "m" (as opposed to "quil.middleware"), ya know, =active= someh
 (if (q/key-pressed?) (q/line 220, 20, 20, 100)))
 )
 #+end_src
-
+** draw most recently pressed key
 #+begin_src clojure :results silent
 (q/defsketch keyey
 :middleware [m/pause-on-error]
@@ -1841,6 +1841,44 @@ Will need to have "m" (as opposed to "quil.middleware"), ya know, =active= someh
 :draw #(do (q/background 0) (q/text (str (q/raw-key)) 60, 80))
 )
 #+end_src
+** Detect a press of a "coded key" 
+#+begin_src clojure :results silent
+(q/defsketch keyey
+:middleware [m/pause-on-error]
+:size [820, 140]
+:setup #(do (q/text-size 64) (q/text-align :center))
+:draw #(do (q/background 0) (q/text (if (q/key-coded? (q/raw-key)) "9" (str (q/raw-key))) 60, 80))
+)
+#+end_src
+** display the key-code as an integer (for coded keys like the arrow keys)
+#+begin_src clojure :results silent
+(q/defsketch keyey
+:middleware [m/pause-on-error]
+:size [820, 140]
+:setup #(do (q/text-size 64) (q/text-align :center))
+:draw #(do (q/background 0) (q/text (if (q/key-coded? (q/raw-key)) (str (q/key-code)) (str (q/raw-key))) 60, 80))
+)
+#+end_src
+
+All is not quite right here!
+#+begin_src clojure :results silent
+  (q/defsketch keyey
+    :middleware [m/pause-on-error]
+    :size [820, 140]
+    :setup #(do (q/text-size 64) (q/text-align :center))
+    :draw #(let [pic1 (q/load-image "shapez1.jpg")
+		 pic2 (q/load-image "shapez-0002.jpg")] 
+	     (q/background 0) 
+	     (if (q/key-pressed?)
+	       (if (q/key-coded? (q/raw-key))
+		 (cond (= 38 (q/raw-key)) (q/image pic1 20, 0)
+		       (= 39 (q/raw-key)) (q/image pic2 20, 0))
+		 (q/text (if (q/key-coded? (q/raw-key)) (str (q/key-code)) (str (q/raw-key))) 660, 80))))
+  )
+
+
+#+end_src
+
 ** conditionally draw different pictures to the screen based on key-input
 #+begin_src clojure :results silent
   (q/defsketch keyey
