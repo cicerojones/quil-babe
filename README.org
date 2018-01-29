@@ -1915,7 +1915,7 @@ All is not quite right here!
 )
 
 #+end_src
-* use midi controller with overtone
+* [#A] use midi controller with overtone
 ** test and debug MIDI controller (debug-on)
 Why is overtone not always immediately available once "used" in the repl?
 
@@ -1924,7 +1924,7 @@ Why is overtone not always immediately available once "used" in the repl?
 #+end_src
 
 #+RESULTS:
-: #namespace[quilbabel.dynamic]
+: #namespace[quilbabel.core]
 
 #+begin_src clojure :results silent
 (in-ns 'quilbabel.core)
@@ -2007,11 +2007,15 @@ Requires a state-ful atom below:
 Must have started-up overtone!
 
 #+begin_src clojure :results silent
+;; relies on the ~rad-atom~ var
+
   (on-event [:midi :control-change]
 	    (fn [{cc-channel :note vel :velocity}]
 	      (case cc-channel
-		1 (do (println (list cc-channel vel @rad-atom)) (swap! rad-atom #(+ % (* 0.01 vel))))
-		2 (do (println (list cc-channel vel @rad-atom)) (swap! rad-atom #(- % (* 0.01 vel))))))
+		1 (do (println (list cc-channel vel @rad-atom))
+		      (swap! rad-atom #(+ % (* 0.01 vel))))
+		2 (do (println (list cc-channel vel @rad-atom))
+		      (swap! rad-atom #(- % (* 0.01 vel))))))
 	    ::a-rad-swapper)
 
 #+end_src
@@ -2020,7 +2024,9 @@ Must have started-up overtone!
   (on-event [:midi :note-on]
 	    (fn [{pad :note vel :velocity}]
 	      (case pad
-		48 (println (list pad vel (with-precision 4 @rad-atom)))
+		;; low C on a small MIDI controller
+		;; 48 (println (list pad vel (with-precision 4 @rad-atom))) 
+		48 (println (list pad vel @rad-atom)) ;; use format fn, not with-precision
 		36 (do (reset! rad-atom 0) (println (list pad vel @rad-atom)))
 		37 (do (reset! rad-atom 0) (println (list pad vel @rad-atom)))
 		38 (do (reset! rad-atom 0) (println (list pad vel @rad-atom)))
@@ -2043,9 +2049,11 @@ Must have started-up overtone!
  #+END_SRC
 
 #+begin_src clojure :results silent
-(q/defsketch diagonals1
-:size [480 120]
-:setup #(q/ellipse 132, 82, @rad-atom))
+;; relies on a meaningful (postive) value for ~rad-atom~
+  (q/defsketch diagonals1
+  :size [480 120]
+  :setup #(q/ellipse 132, 82, @rad-atom, @rad-atom
+  ))
 #+end_src
 
 #+begin_src clojure :results silent 
@@ -2065,6 +2073,7 @@ Must have started-up overtone!
 	    (fn [{pad :note vel :velocity}]
 	      (let [n (format "%.2f" @rad-atom)]
 		(case pad
+		  ;; highest G on small midi controller
 		  79 (println (list pad n))
 		  36 (do (reset! rad-atom 0.001) (println (list pad  n)))
 		  37 (do (reset! rad-atom 0.001) (println (list pad  n)))
@@ -2083,18 +2092,19 @@ Must have started-up overtone!
 #+begin_src clojure :results silent 
 ;; use update with inc to get bigger
     (q/defsketch diagonals1
-    :size [900 300]
+    :size [300 300]
     :setup #(do (q/frame-rate 10) {:x 0 :y 0 :r 1})
-    :draw (fn my-draw [state] (q/background 255) (q/ellipse 20 20 (:r state) (:r state)))
+    :draw (fn my-draw [state] (q/background 255) (q/ellipse 150 150 (:r state) (:r state)))
     :update (fn my-update [state] (update-in state [:r] (fn [_] (identity @rad-atom))))
     :middleware [m/fun-mode m/pause-on-error]
   )
 #+end_src
 
 #+begin_src clojure :results silent
-(reset! rad-atom 0.001)
+;; expect a float (which an int...is not!)
+(reset! rad-atom 10.0)
 
-@rad-atom
+;; @rad-atom
 #+end_src
 
 ** control text display
@@ -2144,7 +2154,7 @@ Works!
 #+end_src
 
 #+begin_src clojure :results silent
-
+;; requires a loaded string (in ~am-str-long~)
 (q/defsketch texty
 :size [480, 120]
 :middleware [m/pause-on-error m/fun-mode]
@@ -2169,6 +2179,7 @@ Works!
 		  42 (do (swap! rate #(- % (* 0.01 vel))) (println (list pad vel n)))
 		  43 (do (swap! rate #(- % (* 0.1 vel))) (println (list pad vel n)))
 		  ;; 37 (do (println (list pad vel n)) (swap! rate #(- % (* 0.1 vel)))))
+		  (println "key not set")
 		  )))
 	    ::a-pad-resetter)
 
