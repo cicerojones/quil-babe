@@ -2,7 +2,8 @@
   ;; (:gen-class)
   (:require [quil.core :as q]
             [quilbabel.dynamic :as dynamic]
-            [quil.middleware :as m]))
+            [quil.middleware :as m]
+            [overtone.live :as o]))
 
 ;; (q/defsketch quil-example
 ;;   :title "Oh shit"
