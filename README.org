@@ -2368,3 +2368,68 @@ Two cheers for ~identity~!
 		(identity state)))
     )
 #+end_src
+
+* use a suite of stateful atoms within a range
+
+** four "changeable constants"
+  #+begin_src clojure :results silent
+(def tenths (atom 0.1))
+(def ones (atom 1))
+(def tens (atom 10))
+(def hundreds (atom 100))
+
+  #+end_src
+
+
+  #+begin_src clojure :results silent
+(def smn (atom 0))
+(def val (atom 0))
+  #+end_src
+
+** create a cycle-able atom
+  #+begin_src clojure :results silent
+(mod (swap! smn inc) 3)
+  #+end_src
+
+#+begin_src clojure :results silent
+  (on-event [:midi :note-on]
+	    (fn [{pad :note vel :velocity}]
+	      (case pad
+		36 (do (println (list pad @ones)) (reset! ones (#(mod (swap! ones inc) 10))))
+		;; 37 (do (println (list pad @val)) (reset! val ((fn uppdr [] (mod (swap! tens #(* 10 (inc %))) 100)))))
+		37 (do (println (list pad @tens)) (reset! tens (mod (swap! tens #(+ 10 %)) 100)))
+		38 (do (println (list pad @hundreds)) (reset! hundreds (mod (swap! hundreds #(+ 100 %)) 1000)))
+		))
+	    ::a-pad-cycler)
+
+#+end_src
+
+  #+begin_src clojure :results silent
+(remove-event-handler ::a-pad-cycler)
+  #+end_src
+
+
+
+** draw some
+  #+begin_src clojure :results silent
+(defn draw [] (q/ellipse 100 100 20 20))
+
+(q/defsketch draah :title "draah" :size [400 400]
+  :draw draw
+)
+
+
+  #+end_src
+
+  #+begin_src clojure :results silent
+(defn draw [] (do (q/background 0) (q/ellipse 100 100 20 20)))
+
+  #+end_src
+
+  #+begin_src clojure :results silent
+(defn draw [] (do (q/background 0) (q/ellipse 50 50 (+ 100 @ones @tens @hundreds) (+ 100 @ones @tens @hundreds))))
+  #+end_src
+
+  #+begin_src clojure :results silent
+(defn draw [] (do (q/background 0) (q/ellipse (+ 50 @ones @tens) (+ 50 @ones @tens) 20 20)))
+  #+end_src
