@@ -1,0 +1,2661 @@
+* preliminaries
+
+** for loop 
+Why the requirement for "show-process" again, in this file but not in the README.org???
+#+begin_src clojure :results silent :show-process t
+(for [n (range 5)] (rand-int 8))
+#+end_src
+
+#+RESULTS:
+
+#+begin_src clojure :session 
+(for [n (range 5)] (rand-int 8))
+#+end_src
+
+#+RESULTS:
+
+* 01_cross_with_circle.clj
+** no namespace
+#+begin_src processing
+
+#+end_src
+
+#+BEGIN_SRC clojure :results silent :show-process t
+  ;; (ns quil-sketches.gen-art.01-cross-with-circle
+  ;;   (:require [quil.core :refer :all]))
+
+  ;; Example 1 - Cross with Circle
+  ;; Taken from Section 2.2.1, p20
+
+  ;; size(500, 300);
+  ;; smooth();
+  ;; background(230, 230, 230);
+  ;; //draw two crossed lines
+  ;; stroke(130, 0, 0);
+  ;; strokeWeight(4);
+  ;; line(width/2 - 70, height/2 - 70, width/2 + 70, height/2 + 70);
+  ;; line(width/2 + 70, height/2 - 70, width/2 - 70, height/2 + 70);
+  ;; //draw a filled circle too
+  ;; fill(255, 150);
+  ;; ellipse(width/2, height/2, 50, 50);
+#+end_src
+
+#+BEGIN_SRC clojure :results silent :show-process t
+  (defn setup []
+    (q/smooth)
+    (q/background 230 230 230)
+    (q/stroke 130, 0 0)
+    (q/stroke-weight 4)
+    (let [cross-size      70
+	  circ-size       50
+	  canvas-x-center (/ (q/width) 2)
+	  canvas-y-center (/ (q/height) 2)
+	  left            (- canvas-x-center cross-size)
+	  right           (+ canvas-x-center cross-size)
+	  top             (+ canvas-y-center cross-size)
+	  bottom          (- canvas-y-center cross-size)]
+      (q/line left bottom right top)
+      (q/line right bottom left top)
+
+      (q/fill 255 150)
+      (q/ellipse canvas-x-center canvas-y-center circ-size circ-size)))
+
+  (q/defsketch gen-art-1
+    :title "Cross with circle"
+    :setup setup
+    ;; :middleware [quil.middleware/fun-mode quil.middleware/pause-on-error]
+    :middleware [m/pause-on-error]
+    :size [500 300])
+  ;; (defn -main [& args])
+
+#+END_SRC
+
+* 02_growing_circle.clj 
+** 
+#+BEGIN_SRC clojure :results silent :show-process t
+  ;; (ns quil-sketches.gen-art.02-growing-circle
+  ;;   (:require [quil.core :refer :all]
+  ;;             [quil.helpers.seqs :refer [seq->stream range-incl]]))
+
+  ;; Example 2 - Growing Circle
+  ;; Taken from Listing 2.1, p28
+
+  ;; int diam = 10;
+  ;; float centX, centY;
+
+  ;; void setup() {
+  ;;   size(500, 300);
+  ;;   frameRate(24);
+  ;;   smooth();
+  ;;   background(180);
+  ;;   centX = width/2;
+  ;;   centY = height/2;
+  ;;   stroke(0);
+  ;;   strokeWeight(5);
+  ;;   fill(255, 50);
+  ;; }
+
+  ;; void draw() {
+  ;;   if(diam <= 400) {
+  ;;     background(180);
+  ;;     ellipse(centX, centY, diam, diam);
+  ;;     diam += 10;
+  ;;   }
+  ;; }
+#+end_src
+** 
+#+BEGIN_SRC clojure :results silent :show-process t
+  (defn setup []
+    (q/frame-rate 24)
+    (q/smooth)
+    (q/background 180)
+    (q/stroke 0)
+    (q/stroke-weight 5)
+    (q/fill 255 25)
+    (let [diams (s/range-incl 10 400 10)]
+      (q/set-state! :diam (s/seq->stream diams)
+		  :cent-x (/ (q/width) 2)
+		  :cent-y (/ (q/height) 2))))
+
+  (defn draw []
+    (let [cent-x (q/state :cent-x)
+	  cent-y (q/state :cent-y)
+	  diam   ((q/state :diam))]
+      (when diam
+	(q/background 180)
+	(q/ellipse cent-x cent-y diam diam))))
+
+  (q/defsketch gen-art-2
+    :title "Growing circle"
+    :setup setup
+    :draw draw
+    :middleware [m/pause-on-error]
+    :size [500 500]
+    :keep-on-top true
+)
+
+  ;; (defn -main [& args])
+
+#+END_SRC
+* 03_concentric_circles.clj 
+** namespaced with processing
+#+BEGIN_SRC clojure :results silent :show-process t
+  ;; (ns quil-sketches.gen-art.03-concentric-circles
+  ;;   (:require [quil.core :refer :all]))
+
+  ;; Example 3 - Concentric circles drawn using traces
+  ;; Taken from Listing 2.3, p37
+
+  ;; int diam = 10;
+  ;; float centX, centY;
+
+  ;; void setup() {
+  ;;   size(500, 300);
+  ;;   frameRate(24);
+  ;;   smooth();
+  ;;   background(180);
+  ;;   centX = width/2;
+  ;;   centY = height/2;
+  ;;   stroke(0);
+  ;;   strokeWeight(1);
+  ;;   noFill();
+  ;; }
+
+  ;; void draw() {
+  ;;   if(diam <= 400) {
+  ;;     ellipse(centX, centY, diam, diam);
+  ;;     diam += 10;
+  ;;   }
+  ;; }
+
+#+end_src
+** one block
+#+BEGIN_SRC clojure :results silent :show-process t
+  (defn setup []
+    (q/frame-rate 24)
+    (q/smooth)
+    (q/background 180)
+    (q/stroke 0)
+    (q/stroke-weight 1)
+    (q/no-fill)
+    (q/set-state! :diam (atom 10)
+		:cent-x (/ (q/width) 2)
+		:cent-y (/ (q/height) 2)))
+
+  (defn draw []
+    (let [cent-x (q/state :cent-x)
+	  cent-y (q/state :cent-y)
+	  diam   (q/state :diam)]
+      (when (<= @diam 400)
+	(q/ellipse cent-x cent-y @diam @diam)
+	(swap! diam + 10))))
+
+  (q/defsketch gen-art-3
+    :title "Concentric Circles"
+    :setup setup
+    :draw draw
+    :middleware [m/pause-on-error]
+    :size [500 300])
+
+  ;; (defn -main [& args])
+
+#+END_SRC
+* 04_fading_horizontal_lines.clj 
+** namespaced with processing
+#+BEGIN_SRC clojure :results silent :show-process t
+  ;; (ns quil-sketches.gen-art.04-fading-horizontal-lines
+  ;;   (:require [quil.core :refer :all]))
+
+  ;; Example 4 - Fading Horizontal Lines
+  ;; Taken from Section 2.4.3, p 39
+
+  ;; void setup() {
+  ;;   size(500, 300);
+  ;;   background(180);
+  ;;   strokeWeight(4);
+  ;;   strokeCap(SQUARE);
+  ;;   for(int h = 10; h <= (height - 15); h+=10){
+  ;;     stroke(0, 255-h);
+  ;;     line(10, h, width - 20, h);
+  ;;     stroke(255, h);
+  ;;     line(10, h+4, width - 20, h+4);
+  ;;   }
+  ;; }
+
+#+end_src
+** one block
+#+BEGIN_SRC clojure :results silent :show-process t
+  (defn draw-line
+    "Draws a horizontal line on the canvas at height h"
+    [h]
+    (q/stroke 0 (- 255 h))
+    (q/line 10 h (- (q/width) 20) h)
+    (q/stroke 255 h)
+    (q/line 10 (+ h 4) (- (q/width) 20) (+ h 4)))
+
+  (defn setup []
+    (q/background 180)
+    (q/stroke-weight 4)
+    (q/stroke-cap :square)
+    (let [line-heights (range 10 (- (q/height) 15) 10)]
+      (dorun (map draw-line line-heights))))
+
+  (q/defsketch example-4
+    :title "Fading Horizontal Lines"
+    :setup setup
+    :size [500 300])
+
+  ;; (defn -main [& args])
+
+#+END_SRC
+* 05_random_scribble.clj 
+** namespaced with processing
+#+BEGIN_SRC clojure :results silent :show-process t
+  ;; (ns quil-sketches.gen-art.05-random-scribble
+  ;;   (:require [quil.core :refer :all]
+  ;;             [quil.helpers.seqs :refer [range-incl]]
+  ;;             [quil.helpers.drawing :refer [line-join-points]]))
+
+  ;; Example 5 - Random Scribble
+  ;; Taken from Section 3.2, p55
+
+  ;; void setup() {
+  ;;   size(500, 100);
+  ;;   background(255);
+  ;;   strokeWeight(5);
+  ;;   smooth();
+  ;;   stroke(0, 30);
+  ;;   line(20, 50, 480, 50);
+  ;;   stroke(20, 50, 70);
+
+  ;;   int step = 10;
+  ;;   float lastx = -999;
+  ;;   float lasty = -999;
+  ;;   float y = 50;
+  ;;   int borderx = 20;
+  ;;   int bordery = 10;
+  ;;   for(int x = borderx; x <= width - borderx; x += step){
+  ;;     y = bordery + random(height - 2* bordery);
+  ;;     if(lastx > -999) {
+  ;;       line(x, y, lastx, lasty);
+  ;;     }
+  ;;   lastx = x;
+  ;;   lasty = y;
+  ;;   }
+  ;; }
+
+#+end_src 
+** one block
+#+BEGIN_SRC clojure :results silent :show-process t
+  (defn rand-y
+    [border-y]
+    (+ border-y (rand (- (q/height) (* 2 border-y)))))
+
+  (defn setup []
+    (q/background 255)
+    (q/stroke-weight 5)
+    (q/smooth)
+    (q/stroke 0 30)
+    (q/line 20 50 480 50)
+
+    (q/stroke 20 50 70)
+    (let [step      10
+	  border-x  20
+	  border-y  10
+	  xs        (s/range-incl border-x (- (q/width) border-x) step)
+	  ys        (repeatedly #(rand-y border-y))
+	  line-args (d/line-join-points xs ys)]
+      (dorun (map #(apply q/line %) line-args))))
+
+
+  (q/defsketch example-5
+    :title "Random Scribble"
+    :setup setup
+    :size [500 100])
+
+  ;; (defn -main [& args])
+
+#+END_SRC
+* 06_rand_walk_scribble.clj 
+** namespaced with processing
+#+BEGIN_SRC clojure :results silent :show-process t
+  ;; (ns quil-sketches.gen-art.06-rand-walk-scribble
+  ;;   (:require [quil.core :refer :all]
+  ;;             [quil.helpers.drawing :refer [line-join-points]]
+  ;;             [quil.helpers.seqs :refer [range-incl]]))
+
+  ;; Example 6 - Random Walk Scribble
+  ;; Taken from Section 3.2, p56
+
+  ;; void setup() {
+  ;;   size(500, 100);
+  ;;   background(255);
+  ;;   strokeWeight(5);
+  ;;   smooth();
+  ;;   stroke(0, 30);
+  ;;   line(20, 50, 480, 50);
+  ;;   stroke(20, 50, 70);
+
+  ;;   float xstep = 10;
+  ;;   float ystep = 10;
+  ;;   float lastx = 20;
+  ;;   float lasty = 50;
+  ;;   float y = 50;
+  ;;   int borderx = 20;
+  ;;   int bordery = 10;
+  ;;   for(int x = borderx; x <= width - borderx; x += xstep){
+  ;;     ystep = random(20) - 10; //range -10 to 10
+  ;;     y += ystep;
+  ;;     line(x, y, lastx, lasty);
+  ;;     lastx = x;
+  ;;     lasty = y;
+  ;;   }
+  ;; }
+
+#+end_src
+** one block
+#+BEGIN_SRC clojure :results silent :show-process t
+  (defn rand-walk-ys
+    [seed]
+    (lazy-seq (cons seed (rand-walk-ys (+ seed (- (rand 20) 10))))))
+
+  (defn setup []
+    (q/background 255)
+    (q/stroke-weight 5)
+    (q/smooth)
+    (q/stroke 0 30)
+    (q/line 20 50 480 50)
+
+    (q/stroke 20 50 70)
+    (let [step      10
+	  border-x  20
+	  xs        (s/range-incl border-x (- (q/width) border-x) step)
+	  ys        (rand-walk-ys (/ (q/height) 2))
+	  line-args (d/line-join-points xs ys)]
+      (dorun (map #(apply q/line %) line-args))))
+
+  (q/defsketch gen-art-6
+    :title "Random Walk Scribble"
+    :setup setup
+    :size [500 100])
+
+  ;;  (defn -main [& args])
+
+#+END_SRC
+* 07_perlin_noise_scribble.clj 
+** namespaced with processing
+#+BEGIN_SRC clojure :results silent :show-process t
+  ;; (ns quil-sketches.gen-art.07-perlin-noise-scribble
+  ;;   (:require [quil.core :refer :all]
+  ;;             [quil.helpers.drawing :refer [line-join-points]]
+  ;;             [quil.helpers.seqs :refer [range-incl perlin-noise-seq]]
+  ;;             [quil.helpers.calc :refer [mul-add]]))
+
+  ;; Example 7 - Perlin Noise Scribblea
+  ;; Taken from Listing 3.1, p59
+
+  ;; void setup() {
+  ;;  size(500, 100);
+  ;;  background(255);
+  ;;  strokeWeight(5);
+  ;;  smooth();
+
+  ;;  stroke(0, 30);
+  ;;  line(20, 50, 480, 50);
+
+  ;;  stroke(20, 50, 70);
+  ;;  int step = 10;
+  ;;  float lastx = -999;
+  ;;  float lasty = -999;
+  ;;  float ynoise = random(10);
+  ;;  float y;
+  ;;  for (int x = 20 ; x <= 480 ; x += step){
+  ;;    y = 10 + noise(ynoise) * 80;
+  ;;    if(lastx > -999) {
+  ;;      line(x, y, lastx, lasty);
+  ;;    }
+  ;;    lastx = x;
+  ;;    lasty =y;
+  ;;    ynoise += 0.1;
+  ;;  }
+  ;; }
+
+#+end_src
+** one block
+#+BEGIN_SRC clojure :results silent :show-process t
+  (defn setup []
+    (q/background 255)
+    (q/stroke-weight 5)
+    (q/smooth)
+
+    (q/stroke 0 30)
+    (q/line 20 50 480 50)
+
+    (q/stroke 20 50 70)
+    (let [step      10
+	  seed      (rand 10)
+	  seed-incr 0.1
+	  y-mul     80
+	  y-add     10
+	  border-x  20
+	  xs        (s/range-incl border-x (- (q/width) border-x) step)
+	  ys        (s/perlin-noise-seq seed seed-incr)
+	  scaled-ys (c/mul-add ys y-mul y-add)
+	  line-args (d/line-join-points xs scaled-ys)]
+      (dorun (map #(apply q/line %) line-args))))
+
+  (q/defsketch gen-art-7
+    :title "Perlin Noise Scribble"
+    :setup setup
+    :size [500 100])
+
+  ;;  (defn -main [& args])
+
+#+END_SRC
+* 08_sine_wave.clj 
+** namespaced with processing
+#+BEGIN_SRC clojure :results silent :show-process t
+  ;; (ns quil-sketches.gen-art.08-sine-save
+  ;;   (:require [quil.core :refer :all]
+  ;;             [quil.helpers.drawing :refer [line-join-points]]
+  ;;             [quil.helpers.seqs :refer [range-incl]]
+  ;;             [quil.helpers.calc :refer [mul-add]]))
+
+  ;; Example 8 - Sine Wave
+  ;; Taken from Listing 3.2, p60
+
+  ;; void setup() {
+  ;;  size(500, 100);
+  ;;  background(255);
+  ;;  strokeWeight(5);
+  ;;  smooth();
+  ;;  stroke(0, 30);
+  ;;  line(20, 50, 480, 50);
+  ;;  stroke(20, 50, 70);
+
+  ;;  float xstep = 1;
+  ;;  float lastx = -999;
+  ;;  float lasty = -999;
+  ;;  float angle = 0;
+  ;;  float y = 50;
+  ;;  for(int x=20; x<=480; x+=xstep){
+  ;;    float rad = radians(angle);
+  ;;    y = 50 + (sin(rad) * 40);
+  ;;    if(lastx > -999) {
+  ;;      line(x, y, lastx, lasty);
+  ;;    }
+  ;;    lastx = x;
+  ;;    lasty = y;
+  ;;    angle++;
+  ;;  }
+  ;; }
+
+
+#+end_src
+** one block
+#+BEGIN_SRC clojure :results silent :show-process t
+  (defn setup []
+    (q/background 255)
+    (q/stroke-weight 5)
+    (q/smooth)
+    (q/stroke 0 30)
+    (q/line 20 50 480 50)
+    (q/stroke 20 50 70)
+
+    (let [xs        (s/range-incl 20 480 1)
+	  rads      (map q/radians (range))
+	  ys        (map q/sin rads)
+	  scaled-ys (c/mul-add ys 40 50)
+	  line-args (d/line-join-points xs scaled-ys)]
+      (dorun (map #(apply q/line %) line-args))))
+
+  (q/defsketch gen-art-8
+    :title "Sine Wave"
+    :setup setup
+    :size [500 100])
+
+  ;; (defn -main [& args])
+
+#+END_SRC
+* 09_sine_wave_with_noise.clj 
+** namespaced with processing
+#+BEGIN_SRC clojure :results silent :show-process t
+  ;; (ns quil-sketches.gen-art.09-sine-wave-with-noise
+  ;;   (:require [quil.core :refer :all]
+  ;;             [quil.helpers.drawing :refer [line-join-points]]
+  ;;             [quil.helpers.seqs :refer [range-incl]]
+  ;;             [quil.helpers.calc :refer [mul-add]]))
+
+  ;; Example 9 - Sine Wave with Noise
+  ;; Taken from Listing 3.2, p60
+
+  ;; void setup() {
+  ;;  size(500, 100);
+  ;;  background(255);
+  ;;  strokeWeight(5);
+  ;;  smooth();
+  ;;  stroke(0, 30);
+  ;;  line(20, 50, 480, 50);
+  ;;  stroke(20, 50, 70);
+
+  ;;  float xstep = 1;
+  ;;  float lastx = -999;
+  ;;  float lasty = -999;
+  ;;  float angle = 0;
+  ;;  float y = 50;
+  ;;  for(int x=20; x<=480; x+=xstep){
+  ;;    float rad = radians(angle);
+  ;;    y = 50 + (pow(sin(rad), 3) * noise(rad*2) * 30)
+  ;;    if(lastx > -999) {
+  ;;      line(x, y, lastx, lasty);
+  ;;    }
+  ;;    lastx = x;
+  ;;    lasty = y;
+  ;;    angle++;
+  ;;  }
+  ;; }
+
+
+#+end_src
+** one block
+#+BEGIN_SRC clojure :results silent :show-process t
+  (defn setup []
+    (q/background 255)
+    (q/stroke-weight 5)
+    (q/smooth)
+    (q/stroke 0 30)
+    (q/line 20 50 480 50)
+    (q/stroke 20 50 70)
+
+    (let [xs        (s/range-incl 20 480 1)
+	  rads      (map q/radians (range))
+	  ys        (map q/sin rads)
+	  ys        (map #(q/pow % 3) ys)
+	  ys        (map (fn [y rad] (* 30 y (q/noise (* 2 rad)))) ys rads)
+	  scaled-ys (c/mul-add ys 1 50)
+
+	  line-args (d/line-join-points xs scaled-ys)]
+      (dorun (map #(apply q/line %) line-args))))
+
+  (q/defsketch gen-art-9
+    :title "Sine Wave with Noise"
+    :setup setup
+    :size [500 100])
+
+  ;; (defn -main [& args])
+
+#+END_SRC
+* 10_custom_rand.clj 
+** namespaced with processing
+#+BEGIN_SRC clojure :results silent :show-process t
+  ;; (ns quil-sketches.gen-art.10-custom-rand
+  ;;   (:require [quil.core :refer :all]
+  ;;             [quil.helpers.drawing :refer [line-join-points]]
+  ;;             [quil.helpers.seqs :refer [range-incl]]
+  ;;             [quil.helpers.calc :refer [mul-add]]))
+
+  ;; Example 10 - Custome Random Function
+  ;; Taken from Listing 3.2, p60
+
+  ;; float customRandom() {
+  ;;   float retValue = 1 - pow(random(1), 5); return retValue;
+  ;; }
+
+  ;; void setup() {
+  ;;  size(500, 100);
+  ;;  background(255);
+  ;;  strokeWeight(5);
+  ;;  smooth();
+  ;;  stroke(0, 30);
+  ;;  line(20, 50, 480, 50);
+  ;;  stroke(20, 50, 70);
+
+  ;;  float xstep = 5;
+  ;;  float lastx = -999;
+  ;;  float lasty = -999;
+  ;;  float angle = 0;
+  ;;  float y = 50;
+  ;;  for(int x=20; x<=480; x+=xstep){
+  ;;    float rad = radians(angle);
+  ;;    y = 20 + (customRandom() * 60);
+  ;;    if(lastx > -999) {
+  ;;      line(x, y, lastx, lasty);
+  ;;    }
+  ;;    lastx = x;
+  ;;    lasty = y;
+  ;;    angle++;
+  ;;  }
+  ;; }
+#+end_src
+** one block
+#+BEGIN_SRC clojure :results silent :show-process t
+  (defn custom-rand
+    []
+    (- 1 (q/pow (q/random 1) 5)))
+
+  (defn setup []
+    (q/background 255)
+    (q/stroke-weight 5)
+    (q/smooth)
+    (q/stroke 0 30)
+    (q/line 20 50 480 50)
+    (q/stroke 20 50 70)
+
+    (let [xs        (s/range-incl 20 480 5)
+	  ys        (repeatedly custom-rand)
+	  scaled-ys (c/mul-add ys 60 20)
+	  line-args (d/line-join-points xs scaled-ys)]
+
+      (dorun (map #(apply q/line %) line-args))))
+
+  (q/defsketch gen-art-10
+    :title "Custom Random Function"
+    :setup setup
+    :size [500 100])
+
+  ;; (defn -main [& args])
+
+#+END_SRC
+* 11_dotted_circle.clj 
+** namespaced with processing
+#+BEGIN_SRC clojure :results silent :show-process t
+  ;; (ns quil-sketches.gen-art.11-dotted-circle
+  ;;   (:require [quil.core :refer :all]
+  ;;             [quil.helpers.drawing :refer [line-join-points]]
+  ;;             [quil.helpers.seqs :refer [range-incl]]))
+
+  ;; Example 11 - Dotted Circle
+  ;; Taken from Listing 4.1, p68
+
+  ;; void setup() {
+  ;;   size(500,300);
+  ;;   background(255);
+  ;;   strokeWeight(5);
+  ;;   smooth();
+  ;;   float radius = 100;
+  ;;   int centX = 250;
+  ;;   int centY = 150;
+  ;;   stroke(0, 30);
+  ;;   noFill();
+  ;;   ellipse(centX,centY,radius*2,radius*2);
+  ;;   stroke(20, 50, 70);
+  ;;   float x, y;
+  ;;   float lastx = -999;
+  ;;   float lasty = -999;
+  ;;   for (float ang = 0; ang <= 360; ang += 5) {
+  ;;     float rad = radians(ang);
+  ;;     x = centX + (radius * cos(rad));
+  ;;     y = centY + (radius * sin(rad));
+  ;;     point(x,y);
+  ;;   }
+  ;; }
+#+end_src
+** one block
+#+BEGIN_SRC clojure :results silent :show-process t
+  (defn setup []
+    (q/background 255)
+    (q/stroke-weight 5)
+    (q/smooth)
+    (let [radius    100
+	  cent-x    250
+	  cent-y    150
+	  rads      (map q/radians (s/range-incl 0 360 5))
+	  xs        (map #(+ cent-x (* radius (q/cos %))) rads)
+	  ys        (map #(+ cent-y (* radius (q/sin %))) rads)]
+      (q/stroke 0 30)
+      (q/no-fill)
+      (q/ellipse cent-x cent-y (* radius 2) (* radius 2))
+      (q/stroke 20 50 70)
+      (dorun (map q/point xs ys))))
+
+  (q/defsketch gen-art-11
+    :title "Dotted Circle"
+    :setup setup
+    :size [500 300])
+
+  ;; (defn -main [& args])
+
+#+END_SRC
+* 12_spiral.clj 
+** namespaced with processing
+#+BEGIN_SRC clojure :results silent :show-process t
+  ;; (ns quil-sketches.gen-art.12-aspiral
+  ;;   (:require [quil.core :refer :all]
+  ;;             [quil.helpers.drawing :refer [line-join-points]]
+  ;;             [quil.helpers.seqs :refer [range-incl steps]]))
+
+  ;; Example 12 - Spiral
+  ;; Taken from Listing 4.2, p69
+
+  ;; void setup() {
+  ;;   size(500,300);
+  ;;   background(255);
+  ;;   strokeWeight(5);
+  ;;   smooth();
+  ;;   float radius = 100;
+  ;;   int centX = 250;
+  ;;   int centY = 150;
+  ;;   stroke(0, 30);
+  ;;   noFill();
+  ;;   ellipse(centX,centY,radius*2,radius*2);
+  ;;   stroke(20, 50, 70);
+  ;;   radius = 10;
+  ;;   float x, y;
+  ;;   float lastx = -999;
+  ;;   float lasty = -999;
+  ;;   for (float ang = 0; ang <= 1440; ang += 5) {
+  ;;     radius += 0.5;
+  ;;     float rad = radians(ang);
+  ;;     x = centX + (radius * cos(rad));
+  ;;     y = centY + (radius * sin(rad));
+  ;;     if (lastx > -999) {
+  ;;       line(x,y,lastx,lasty);
+  ;;     }
+  ;;     lastx = x;
+  ;;     lasty = y;
+  ;;   }
+  ;; }
+
+#+end_src
+** one block
+#+BEGIN_SRC clojure :results silent :show-process t
+  (defn setup []
+    (q/background 255)
+    (q/stroke-weight 5)
+    (q/smooth)
+    (let [radius    100
+	  cent-x    250
+	  cent-y    150
+	  radians   (map q/radians (s/range-incl 0 1440 5))
+	  radii     (s/steps 10 0.5)
+	  xs        (map (fn [radians radius] (+ cent-x (* radius (q/cos radians)))) radians radii)
+	  ys        (map (fn [radians radius] (+ cent-y (* radius (q/sin radians)))) radians radii)
+	  line-args (d/line-join-points xs ys)]
+      (q/stroke 0 30)
+      (q/no-fill)
+      (q/ellipse cent-x cent-y (* radius 2) (* radius 2))
+      (q/stroke 20 50 70)
+      (dorun (map #(apply q/line %) line-args))))
+
+  (q/defsketch gen-art-12
+    :title "Spiral"
+    :setup setup
+    :size [500 300])
+
+  ;; (defn -main [& args])
+
+#+END_SRC
+* 13_noisy_spiral.clj 
+** namespaced with processing
+#+BEGIN_SRC clojure :results silent :show-process t
+  ;; (ns quil-sketches.gen-art.13-noisy-spiral
+  ;;   (:require [quil.core :refer :all]
+  ;;             [quil.helpers.drawing :refer [line-join-points]]
+  ;;             [quil.helpers.seqs :refer [range-incl steps]]
+  ;;             [quil.helpers.calc :refer [mul-add]]))
+
+  ;; Example 13 - Noisy Spiral
+  ;; Taken from Listing 4.3, p69
+
+  ;; void setup() {
+  ;;   size(500,300);
+  ;;   background(255);
+  ;;   strokeWeight(5);
+  ;;   smooth();
+  ;;   float radius = 100;
+  ;;   int centX = 250;
+  ;;   int centY = 150;
+  ;;   stroke(0, 30);
+  ;;   noFill();
+  ;;   ellipse(centX,centY,radius*2,radius*2);
+  ;;   stroke(20, 50, 70);
+
+  ;;   radius = 10;
+  ;;   float x, y;
+  ;;   float lastx = -999;
+  ;;   float lasty = -999;
+  ;;   float radiusNoise = random(10);
+  ;;   for(float ang=0;ang<=1440;ang+=5){
+  ;;     radiusNoise += 0.05;
+  ;;     radius += 0.5;
+  ;;     float thisRadius = radius + (noise(radiusNoise) * 200) - 100;
+  ;;     float rad = radians(ang);
+  ;;     x = centX + (thisRadius * cos(rad));
+  ;;     y = centY + (thisRadius * sin(rad));
+  ;;     if (lastx > -999) {
+  ;;       line(x,y,lastx,lasty);
+  ;;     }
+  ;;     lastx = x;
+  ;;     lasty = y;
+  ;;   }
+  ;; }
+
+#+end_src
+** one block
+#+BEGIN_SRC clojure :results silent :show-process t
+  (defn setup []
+    (q/background 255)
+    (q/stroke-weight 5)
+    (q/smooth)
+    (let [radius    100
+	  cent-x    250
+	  cent-y    150
+	  rad-noise (s/steps (rand 10) 0.05)
+	  rad-noise (map #(* 200 (q/noise %)) rad-noise)
+	  rads      (map q/radians (s/range-incl 0 1440 5))
+	  radii     (s/steps 10 0.5)
+	  radii     (map (fn [rad noise] (+ rad noise -100)) radii rad-noise)
+	  xs        (map (fn [rad radius] (c/mul-add (q/cos rad) radius cent-x)) rads radii)
+	  ys        (map (fn [rad radius] (c/mul-add (q/sin rad) radius cent-y)) rads radii)
+	  line-args (d/line-join-points xs ys)]
+      (q/stroke 0 30)
+      (q/no-fill)
+      (q/ellipse cent-x cent-y (* radius 2) (* radius 2))
+      (q/stroke 20 50 70)
+      (dorun (map #(apply q/line %) line-args))))
+
+  (q/defsketch gen-art-13
+    :title "Noisy Spiral"
+    :setup setup
+    :size [500 300])
+
+  ;; (defn -main [& args])
+
+#+END_SRC
+* 14_hundred_noisy_spirals.clj 
+** namespaced with processing
+#+BEGIN_SRC clojure :results silent :show-process t
+  ;; (ns quil-sketches.gen-art.14-hundred-noisy-spirals
+  ;;   (:require [quil.core :refer :all]
+  ;;             [quil.helpers.drawing :refer [line-join-points]]
+  ;;             [quil.helpers.seqs :refer [range-incl steps]]
+  ;;             [quil.helpers.calc :refer [mul-add]]))
+
+  ;; Example 14 - 100 Noisy Spirals
+  ;; Taken from Listing 4.4, p71
+
+  ;; void setup() {
+  ;;   size(500,300);
+  ;;   background(255);
+  ;;   strokeWeight(0.5);
+  ;;   smooth();
+  ;;   int centX = 250;
+  ;;   int centY = 150;
+
+  ;;   float x, y;
+  ;;   for (int i = 0; i<100; i++) {
+
+  ;;     float lastx = -999;
+  ;;     float lasty = -999;
+  ;;     float radiusNoise = random(10);
+  ;;     float radius = 10;
+  ;;     stroke(random(20), random(50), random(70), 80);
+  ;;     int startangle = int(random(360));
+  ;;     int endangle = 1440 + int(random(1440));
+  ;;     int anglestep = 5 + int(random(3));
+  ;;     for (float ang = startangle; ang <= endangle; ang += anglestep) {
+  ;;       radiusNoise += 0.05;
+  ;;       radius += 0.5;
+  ;;       float thisRadius = radius + (noise(radiusNoise) * 200) - 100;
+  ;;       float rad = radians(ang);
+  ;;       x = centX + (thisRadius * cos(rad));
+  ;;       y = centY + (thisRadius * sin(rad));
+  ;;       if (lastx > -999) {
+  ;;         line(x,y,lastx,lasty);
+  ;;       }
+  ;;       lastx = x;
+  ;;       lasty = y;
+  ;;     }
+  ;;   }
+  ;; }
+
+#+end_src
+** one block
+#+BEGIN_SRC clojure :results silent :show-process t
+  (defn setup []
+    (q/background 255)
+    (q/stroke-weight 0.5)
+    (q/smooth)
+    (dotimes [_ 100]
+      (let [radius      100
+	    cent-x      250
+	    cent-y      150
+	    start-angle (rand 360)
+	    end-angle   (+ 1440 (rand 1440))
+	    angle-step  (+ 5 (rand 3))
+	    rad-noise   (s/steps (rand 10) 0.05)
+	    rad-noise   (map #(* 200 (q/noise %)) rad-noise)
+	    rads        (map q/radians (s/range-incl start-angle end-angle angle-step))
+	    radii       (s/steps 10 0.5)
+	    radii       (map (fn [rad noise] (+ rad noise -100)) radii rad-noise)
+	    xs          (map (fn [rad radius] (c/mul-add (q/cos rad) radius cent-x)) rads radii)
+	    ys          (map (fn [rad radius] (c/mul-add (q/sin rad) radius cent-y)) rads radii)
+	    line-args   (d/line-join-points xs ys)]
+	(q/stroke (rand 20) (rand 50) (rand 70) 80)
+	(dorun (map #(apply q/line %) line-args)))))
+
+  (q/defsketch gen-art-14
+    :title "100 Noisy Spirals"
+    :setup setup
+    :size [500 300])
+
+  ;; (defn -main [& args])
+
+#+END_SRC
+* 15_custom_noise_circle.clj 
+** namespaced with processing
+#+BEGIN_SRC clojure :results silent :show-process t
+  ;; (ns quil-sketches.gen-art.15-noise-circle
+  ;;   (:require [quil.core :refer :all]
+  ;;             [quil.helpers.drawing :refer [line-join-points]]
+  ;;             [quil.helpers.seqs :refer [range-incl]]
+  ;;             [quil.helpers.calc :refer [mul-add]]))
+
+  ;; Example 15 - Custom Noise Circle
+  ;; Taken from Listing 4.5, p73
+
+  ;; void setup(){
+  ;;   size(500, 300);
+  ;;   background(255);
+  ;;   strokeWeight(5);
+  ;;   smooth();
+
+  ;;   float radius = 100;
+  ;;   int centX = 250;
+  ;;   int centY = 150;
+
+  ;;   stroke(0, 30);
+  ;;   noFill();
+  ;;   ellipse(centX, centY, radius*2, radius*2);
+
+  ;;   stroke(20, 50, 70);
+  ;;   strokeWeight(1);
+  ;;   float x, y;
+  ;;   float noiseval = random(10);
+  ;;   float radVariance, thisRadius, rad;
+  ;;   beginShape();
+  ;;   fill(20, 50, 70, 50);
+  ;;   for(float ang = 0; ang <= 360; ang += 1){
+
+  ;;     noiseval += 0.1;
+  ;;     radVariance = 30 * customNoise(noiseval);
+
+  ;;     thisRadius = radius + radVariance;
+  ;;     rad = radians(ang);
+  ;;     x = centX + (thisRadius * cos(rad));
+  ;;     y = centY + (thisRadius * sin(rad));
+
+  ;;     curveVertex(x, y);
+  ;;   }
+  ;;   endShape();
+  ;; }
+
+  ;; float customNoise(float value){
+  ;;   float retValue = pow(sin(value), 3);
+  ;;   return retValue;
+  ;; }
+
+#+end_src
+** one block
+#+BEGIN_SRC clojure :results silent :show-process t
+  (defn custom-noise [val]
+    (q/pow (q/sin val) 3))
+
+  (comment ;;alternative noise fn to generate Figure 4.8
+    (defn custom-noise [val]
+      (let [count (int (mod val 12))]
+	 (q/pow (q/sin val) count))))
+
+  (defn setup []
+    (q/background 255)
+    (q/stroke-weight 5)
+    (q/smooth)
+    (q/stroke 0 30)
+    (q/no-fill)
+
+    (let [radius     100
+	  cent-x     250
+	  cent-y     150
+	  noise-val  (rand 10)
+	  angles     (s/range-incl 0 360)
+	  rads       (map q/radians angles)
+	  noise-vals (range noise-val Float/POSITIVE_INFINITY 0.1)
+	  rad-vars   (map #(* 30 (custom-noise %)) noise-vals)
+	  radii      (map + rad-vars (repeat radius))
+	  xs         (map (fn [radius rad] (c/mul-add (q/cos rad) radius cent-x)) radii rads)
+	  ys         (map (fn [radius rad] (c/mul-add (q/sin rad) radius cent-y)) radii rads)]
+
+      (q/ellipse cent-x cent-y (* 2 radius) (* 2 radius))
+      (q/stroke 20 50 70)
+      (q/stroke-weight 1)
+      (begin-shape)
+      (q/fill 20 50 70 50)
+      (dorun (map curve-vertex xs ys))
+      (end-shape)))
+
+  (q/defsketch gen-art-15
+    :title "Custom Noise Circle"
+    :setup setup
+    :size [500 300])
+
+  ;; (defn -main [& args])
+
+#+END_SRC
+* 16_circle_from_opposing_lines.clj 
+** namespaced with processing
+#+BEGIN_SRC clojure :results silent :show-process t
+  ;; (ns quil-sketches.gen-art.16-circle-from-opposing-lines
+  ;;   (:require [quil.core :refer :all]
+  ;;             [quil.helpers.drawing :refer [line-join-points]]
+  ;;             [quil.helpers.seqs :refer [range-incl]]
+  ;;             [quil.helpers.calc :refer [mul-add]]))
+
+  ;; Example 16 - Circle from Opposing Lines
+  ;; Taken from Section 4.2, p76
+
+  ;; void setup() {
+  ;;   size(500,300);
+  ;;   background(255);
+  ;;   strokeWeight(0.5);
+  ;;   smooth();
+  ;;   float radius = 130;
+  ;;   int centX = 250;
+  ;;   int centY = 150;
+  ;;   stroke(20, 50, 70);
+  ;;   float x1, y1, x2, y2, opprad;
+  ;;   float lastx = -999;
+  ;;   float lasty = -999;
+  ;;   for (float ang = 0; ang <= 360; ang += 1) {
+  ;;     float rad = radians(ang);
+  ;;     x1 = centX + (radius * cos(rad));
+  ;;     y1 = centY + (radius * sin(rad));
+  ;;     opprad = rad + PI;
+  ;;
+  ;;     x2 = centX + (radius * cos(opprad));
+  ;;     y2 = centY + (radius * sin(opprad));
+  ;;     line(x1,y1, x2, y2);
+  ;;   }
+  ;; }
+
+#+end_src
+** one block
+#+BEGIN_SRC clojure :results silent :show-process t
+  (defn setup []
+    (q/background 255)
+    (q/stroke-weight 0.5)
+    (q/smooth)
+    (q/no-fill)
+    (q/stroke 20 50 70)
+    (let [radius   130
+	  cent-x   250
+	  cent-y   150
+	  angles   (s/range-incl 0 360)
+	  rads     (map q/radians angles)
+	  opp-rads (map + rads (repeat q/PI))
+	  x1s      (map #(c/mul-add (q/cos %) radius cent-x) rads)
+	  y1s      (map #(c/mul-add (q/sin %) radius cent-y) rads)
+	  x2s      (map #(c/mul-add (q/cos %) radius cent-x) opp-rads)
+	  y2s      (map #(c/mul-add (q/sin %) radius cent-y) opp-rads)]
+      (doall (map line x1s y1s x2s y2s))))
+
+
+  (q/defsketch gen-art-16
+    :title "Circle from Opposing Lines"
+    :setup setup
+    :size [500 300])
+
+  ;; (defn -main [& args])
+
+#+END_SRC
+* 17_circle_from_fading_opposing_lines.clj 
+** namespaced with processing
+#+BEGIN_SRC clojure :results silent :show-process t
+  ;; (ns quil-sketches.gen-art.17-circle-from-fading-opposing-lines
+  ;;   (:require [quil.core :refer :all]
+  ;;             [quil.helpers.seqs :refer [range-incl]]
+  ;;             [quil.helpers.calc :refer [mul-add]]))
+
+  ;; Example 17 - Circle from Fading Opposing Lines
+  ;; Taken from Section 4.2, p79 (Figure 4.12)
+
+  ;; void setup() {
+  ;;   size(500,300);
+  ;;   background(255);
+  ;;   strokeWeight(0.5);
+  ;;   smooth();
+  ;;   float radius = 130;
+  ;;   int centX = 250;
+  ;;   int centY = 150;
+  ;;   float x1, y1, x2, y2;
+  ;;   float lastx = -999;
+  ;;   float lasty = -999;
+  ;;   int strokeCol = 255;
+  ;;   for (float ang = 0; ang <= 360; ang += 1) {
+  ;;     float rad = radians(ang);
+  ;;     x1 = centX + (radius * cos(rad));
+  ;;     y1 = centY + (radius * sin(rad));
+  ;;     float opprad = rad + PI;
+  ;;
+  ;;     x2 = centX + (radius * cos(opprad));
+  ;;     y2 = centY + (radius * sin(opprad));
+  ;;     strokeCol -= 1;
+  ;;     if (q/strokeCol < 0) {
+  ;;       strokeCol = 255;
+  ;;     }
+  ;;     stroke(q/strokeCol);
+  ;;
+  ;;     line(x1,y1, x2, y2);
+  ;;   }
+  ;; }
+
+#+end_src
+** one block
+#+BEGIN_SRC clojure :results silent :show-process t
+  (defn setup []
+    (q/background 255)
+    (q/stroke-weight 0.5)
+    (q/smooth)
+    (q/stroke 20 50 70)
+    (let [radius   130
+	  cent-x   250
+	  cent-y   150
+	  angles   (s/range-incl 0 360)
+	  rads     (map q/radians angles)
+	  opp-rads (map + rads (repeat q/PI))
+	  colours  (cycle (s/range-incl 255 0 -1))
+	  x1s      (map #(c/mul-add (q/cos %) radius cent-x) rads)
+	  y1s      (map #(c/mul-add (q/sin %) radius cent-y) rads)
+	  x2s      (map #(c/mul-add (q/cos %) radius cent-x) opp-rads)
+	  y2s      (map #(c/mul-add (q/sin %) radius cent-y) opp-rads)]
+      (doall (map (fn [x1 y1 x2 y2 col]
+		    (q/stroke col)
+		    (q/line x1 y1 x2 y2))
+		  x1s y1s x2s y2s colours))))
+
+  (q/defsketch gen-art-17
+   :title "Circle from Fading Opposing Lines"
+   :setup setup
+   :size [500 300])
+
+  ;; (defn -main [& args])
+
+#+END_SRC
+* 18_warped_circle_from_fading_opposing_lines.clj 
+** namespaced with processing
+#+BEGIN_SRC clojure :results silent :show-process t
+  ;; (ns quil-sketches.gen-art.18-warped-circle-from-fading-opposing-lines
+  ;;   (:require [quil.core :refer :all]
+  ;;             [quil.helpers.seqs :refer [range-incl steps]]
+  ;;             [quil.helpers.calc :refer [mul-add]]))
+
+  ;; Example 18 - Warped Circle from Fading Opposing Lines
+  ;; Taken from Section 4.2, p79 (Figure 4.13)
+
+  ;; void setup() {
+  ;;   size(500,300);
+  ;;   background(255);
+  ;;   smooth();
+  ;;   float radius;
+  ;;   int centX = 250;
+  ;;   int centY = 150;
+  ;;   float x1, y1, x2, y2;
+  ;;   float lastx = -999;
+  ;;   float lasty = -999;
+  ;;   int strokeCol = 255;
+  ;;   float radiusNoise = random(10);
+  ;;   for (float ang = 0; ang <= 360; ang += 1) {
+  ;;     float rad = radians(ang);
+  ;;     radius = (noise(radiusNoise) * 400) + 1;
+  ;;     x1 = centX + (radius * cos(rad));
+  ;;     y1 = centY + (radius * sin(rad));
+  ;;     float opprad = rad + PI;
+  ;;
+  ;;     x2 = centX + (radius * cos(opprad));
+  ;;     y2 = centY + (radius * sin(opprad));
+  ;;     strokeCol -= 1;
+  ;;     if (q/strokeCol < 0) {
+  ;;       strokeCol = 255;
+  ;;     }
+  ;;     stroke(q/strokeCol);
+  ;;
+  ;;     line(x1,y1, x2, y2);
+  ;;     radiusNoise += 0.005;
+  ;;   }
+  ;; }
+
+#+end_src
+** one block
+#+BEGIN_SRC clojure :results silent :show-process t
+  (defn setup []
+    (q/background 255)
+    (q/stroke-weight 0.5)
+    (q/smooth)
+    (q/stroke 20 50 70)
+    (let [cent-x    250
+	  cent-y    150
+	  angles    (s/range-incl 0 360)
+	  rads      (map q/radians angles)
+	  opp-rads  (map + rads (repeat q/PI))
+	  colours   (cycle (s/range-incl 255 0 -1))
+	  rad-noise (s/steps (q/random 10) 0.005)
+	  radii     (map q/noise rad-noise)
+	  radii     (c/mul-add radii 400 1)
+	  x1s       (map (fn [radius rad] (c/mul-add (q/cos rad) radius cent-x)) radii rads)
+	  y1s       (map (fn [radius rad] (c/mul-add (q/sin rad) radius cent-y)) radii rads)
+	  x2s       (map (fn [radius rad] (c/mul-add (q/cos rad) radius cent-x)) radii opp-rads)
+	  y2s       (map (fn [radius rad] (c/mul-add (q/sin rad) radius cent-y)) radii opp-rads)]
+      (doall (map (fn [x1 y1 x2 y2 col]
+		    (q/stroke col)
+		    (q/line x1 y1 x2 y2))
+		  x1s y1s x2s y2s colours))))
+
+  (q/defsketch gen-art-18
+    :title "Warped Circle from Fading Opposing Lines"
+    :setup setup
+    :size [500 300])
+
+  ;; (defn -main [& args])
+
+#+END_SRC
+* 19_wave_clock.clj 
+** namespaced with processing
+#+BEGIN_SRC clojure :results silent :show-process t
+  ;; (ns quil-sketches.gen-art.19-wave-clock
+  ;;   (:require [quil.core :refer :all]
+  ;;             [quil.helpers.seqs :refer [cycle-between seq->stream steps]]
+  ;;             [quil.helpers.calc :refer [mul-add]]))
+
+  ;; Example 19 - Wave Clock
+  ;; Taken from Listing 4.6, p79
+
+  ;; float _angnoise, _radiusnoise;
+  ;; float _xnoise, _ynoise;
+  ;; float _angle = -PI/2;
+  ;; float _radius;
+  ;; float _strokeCol = 254;
+  ;; int _strokeChange = -1;
+
+  ;; void setup() {
+  ;;   size(500, 300);
+  ;;   smooth();
+  ;;   frameRate(30);
+  ;;   background(255);
+  ;;   noFill();
+  ;;   _angnoise = random(10);
+  ;;   _radiusnoise = random(10);
+  ;;   _xnoise = random(10);
+  ;;   _ynoise = random(10);
+  ;; }
+
+  ;; void draw() {
+  ;;   _radiusnoise += 0.005;
+  ;;   _radius = (noise(_radiusnoise) * 550) +1;
+  ;;   _angnoise += 0.005;
+  ;;   _angle += (noise(_angnoise) * 6) - 3;
+  ;;   if (_angle > 360) { _angle -= 360; }
+  ;;   if (_angle < 0) { _angle += 360; }
+  ;;   _xnoise += 0.01;
+  ;;   _ynoise += 0.01;
+  ;;   float centerX = width/2 + (noise(_xnoise) * 100) - 50;
+  ;;   float centerY = height/2 + (noise(_ynoise) * 100) - 50;
+  ;;   float rad = radians(_angle);
+  ;;   float x1 = centerX + (_radius * cos(rad));
+  ;;   float y1 = centerY + (_radius * sin(rad));
+  ;;   float opprad = rad + PI;
+  ;;   float x2 = centerX + (_radius * cos(opprad));
+  ;;   float y2 = centerY + (_radius * sin(opprad));
+  ;;   _strokeCol += _strokeChange;
+  ;;   if (_strokeCol > 254) { _strokeChange = -1; }
+  ;;   if (_strokeCol < 0) { _strokeChange = 1; }
+  ;;   stroke(_strokeCol, 60);
+  ;;   strokeWeight(1);
+  ;;   line(x1, y1, x2, y2);
+  ;; }
+
+#+end_src
+** one block
+#+BEGIN_SRC clojure :results silent :show-process t
+  
+(defn mk-lines-stream
+    []
+    (let [half-width   (/ (q/width) 1.1)
+	  half-height  (/ (q/height) 1.1)
+	  radius-steps (s/steps (q/random 10) 0.005)
+	  angle-steps  (s/steps (q/random 10) 0.005)
+	  x-steps      (s/steps (q/random 10) 0.01)
+	  x-noises     (map q/noise x-steps)
+	  y-steps      (s/steps (q/random 10) 0.01)
+	  y-noises     (map q/noise y-steps)
+	  angle-noises (map q/noise angle-steps)
+	  angle-noises (c/mul-add angle-noises 6 -3)
+	  angles       (s/steps (- (/ q/PI 2)) angle-noises)
+	  angles       (map #(mod % 360) angles)
+	  rads         (map q/radians angles)
+	  center-xs    (c/mul-add x-noises 100 (- half-width 50))
+	  center-ys    (c/mul-add y-noises 100 (- half-height 50))
+	  radii        (map q/noise radius-steps)
+	  radii        (c/mul-add radii 550 1)
+	  cos-rads     (map q/cos rads)
+	  sin-rads     (map q/sin rads)
+	  opp-rads     (map #(+ q/PI %) rads)
+	  cos-opp-rads (map q/cos opp-rads)
+	  sin-opp-rads (map q/sin opp-rads)
+	  x1s          (c/mul-add cos-rads radii center-xs)
+	  y1s          (c/mul-add sin-rads radii center-ys)
+	  x2s          (c/mul-add cos-opp-rads radii center-xs)
+	  y2s          (c/mul-add sin-opp-rads radii center-ys)
+	  lines        (map list x1s y1s x2s y2s)]
+      (s/seq->stream lines)))
+
+  (defn mk-cols-stream
+    []
+    (let [stroke-cols (s/cycle-between 0 255)]
+      (s/seq->stream stroke-cols)))
+
+  (defn setup []
+    (q/smooth)
+    (q/frame-rate 30)
+    (q/background 255)
+    (q/no-fill)
+    (q/stroke-weight 3)
+    (q/set-state! :lines-str (mk-lines-stream)
+		  :cols-str (mk-cols-stream)))
+
+  (defn draw []
+    (let [lines-str (q/state :lines-str)
+	  cols-str  (q/state :cols-str)
+	  line-args (lines-str)
+	  col       (cols-str)]
+      (q/stroke col 60)
+      (apply q/line line-args)))
+
+  (q/defsketch gen-art-19
+    :title "Wave Clock"
+    :setup setup
+    :middleware [m/pause-on-error]
+    :draw draw
+    ;; :size [500 300]
+
+    :size :fullscreen
+    :features [
+	       :present 
+	       :resizable]
+    )
+
+  ;; (defn -main [& args])
+
+#+END_SRC
+* 20_noise_grid.clj 
+** namespaced with processing
+#+BEGIN_SRC clojure :results silent :show-process t
+  ;; (ns quil-sketches.gen-art.20-noise-grid
+  ;;   (:require [quil.core :refer :all]
+  ;;             [quil.helpers.seqs :refer [range-incl]]
+  ;;             [quil.helpers.calc :refer [mul-add]]))
+
+  ;; Example 20 - 2D Noise Grid
+  ;; Taken from Listing 5.1, p84
+
+  ;; void setup() {
+  ;;   size(300,300);
+  ;;   smooth();
+  ;;   background(255);
+  ;;   float xstart = random(10);
+  ;;   float xnoise = xstart;
+  ;;   float ynoise = random(10);
+  ;;   for(int y=0;y<=height;y+=1){
+  ;;     ynoise += 0.01;
+  ;;     xnoise = xstart;
+  ;;     for(int x=0;x<=width;x+=1){
+  ;;       xnoise += 0.01;
+  ;;       int alph = int(noise(xnoise, ynoise) * 255);
+  ;;       stroke(0, alph);
+  ;;       line(x,y, x+1, y+1);
+  ;;     }
+  ;;   }
+  ;; }
+
+#+end_src
+** one block
+#+BEGIN_SRC clojure :results silent :show-process t
+  (defn setup []
+    (q/smooth)
+    (q/background 255)
+    (dorun
+     (let [x-start (q/random 10)
+	   y-start (q/random 10)]
+       (for [y (s/range-incl (q/height))
+	     x (s/range-incl (q/width))]
+	 (let [x-noise (c/mul-add x 0.01 x-start)
+	       y-noise (c/mul-add y 0.01 y-start)
+	       alph    (* 255 (q/noise x-noise y-noise))]
+	   (q/stroke-int 0 alph)
+	   (q/line x y (inc x) (inc y)))))))
+
+  (q/defsketch gen-art-20
+    :title "2D Noise Grid"
+    :setup setup
+    :size [300 300])
+
+  ;; (defn -main [& args])
+
+#+END_SRC
+* 21_squared_noise_grid.clj 
+** namespaced with processing
+#+BEGIN_SRC clojure :results silent :show-process t
+  ;; (ns quil-sketches.gen-art.22-squared-noise-grid
+  ;;   (:require [quil.core :refer :all]
+  ;;             [quil.helpers.seqs :refer [range-incl]]
+  ;;             [quil.helpers.calc :refer [mul-add]]))
+
+  ;; Example 21 - Squared 2D Noise Grid
+  ;; Taken from Listing 5.2, p86
+
+  ;; float xstart, xnoise, ynoise;
+  ;;
+  ;; void setup() {
+  ;;   size(300, 300);
+  ;;   smooth();
+  ;;   background(255);
+  ;;   xstart = random(10);
+  ;;   xnoise = xstart;
+  ;;   ynoise = random(10);
+  ;;   for(int y = 0; y <= height; y+=5) {
+  ;;     ynoise += 0.1;
+  ;;     xnoise = xstart;
+  ;;     for(int x = 0; x <= width; x+=5) {
+  ;;       xnoise += 0.1;
+  ;;       drawPoint(x, y, noise(xnoise, ynoise));
+  ;;     }
+  ;;   }
+  ;; }
+
+  ;; void drawPoint(float x, float y, float noiseFactor) {
+  ;;   float len = 10 * noiseFactor;
+  ;;   rect(x, y, len, len);
+  ;; }
+
+#+end_src
+** one block
+#+BEGIN_SRC clojure :results silent :show-process t
+  (defn draw-point
+    [x y noise-factor]
+    (let [len (* 10 noise-factor)]
+      (q/rect x y len len)))
+
+  (defn draw-squares
+    [x-start y-start]
+    (dorun
+     (for [y (s/range-incl 0 (q/height) 5)
+	   x (s/range-incl 0 (q/width) 5)]
+       (let [x-noise (c/mul-add x 0.01 x-start)
+	     y-noise (c/mul-add y 0.01 y-start)
+	     alph    (* 255 (q/noise x-noise y-noise))]
+	 (draw-point x y (q/noise x-noise y-noise))))))
+
+  (defn setup []
+    (q/smooth)
+    (q/background 255)
+    (draw-squares (q/random 10) (q/random 10)))
+
+  (q/defsketch gen-art-21
+    :title "Squared 2D Noise Grid"
+    :setup setup
+    :size [300 300])
+
+  ;; (defn -main [& args])
+
+#+END_SRC
+* 22_rotating_lines_noise_grid.clj 
+** namespaced with processing
+#+BEGIN_SRC clojure :results silent :show-process t
+  ;; (ns quil-sketches.gen-art.22-rotating-lines-noise-grid
+  ;;   (:require [quil.core :refer :all]
+  ;;             [quil.helpers.seqs :refer [range-incl]]
+  ;;             [quil.helpers.calc :refer [mul-add]]))
+
+  ;; Example 22 - Rotating Lines 2D Noise Grid
+  ;; Taken from Section 5.12, p86 (Figure 5.3)
+
+  ;; float xstart, xnoise, ynoise;
+  ;;
+  ;; void setup() {
+  ;;   size(300, 300);
+  ;;   smooth();
+  ;;   background(255);
+  ;;   xstart = random(10);
+  ;;   xnoise = xstart;
+  ;;   ynoise = random(10);
+  ;;   for(int y = 0; y <= height; y+=5) {
+  ;;     ynoise += 0.1;
+  ;;     xnoise = xstart;
+  ;;     for(int x = 0; x <= width; x+=5) {
+  ;;       xnoise += 0.1;
+  ;;       drawPoint(x, y, noise(xnoise, ynoise));
+  ;;     }
+  ;;   }
+  ;; }
+
+  ;; void drawPoint(float x, float y, float noiseFactor) {
+  ;;   pushMatrix();
+  ;;   translate(x,y);
+  ;;   rotate(noiseFactor * radians(360));
+  ;;   stroke(0, 150);
+  ;;   line(0,0,20,0);
+  ;;   popMatrix();
+  ;; }
+
+
+#+end_src
+** one block
+#+BEGIN_SRC clojure :results silent :show-process t
+  (defn draw-point
+    [x y noise-factor]
+    (q/push-matrix)
+    (q/translate x y)
+    (q/rotate (* noise-factor (q/radians 360)))
+    (q/stroke 0 150)
+    (q/line 0 0 20 0)
+    (q/pop-matrix))
+
+  (defn draw-all-points
+    [x-start y-start]
+    (dorun
+     (for [y (s/range-incl 0 (q/height) 5)
+	   x (s/range-incl 0 (q/width) 5)]
+       (let [x-noise (c/mul-add x 0.01 x-start)
+	     y-noise (c/mul-add y 0.01 y-start)
+	     alph    (* 255 (q/noise x-noise y-noise))]
+	 (draw-point x y (q/noise x-noise y-noise))))))
+
+  (defn setup []
+    (q/smooth)
+    (q/background 255)
+    (draw-all-points (q/random 10) (q/random 10)))
+
+  (q/defsketch gen-art-22
+    :title "Rotating Lines 2D Noise Grid"
+    :setup setup
+    :size [300 300])
+
+  ;; (defn -main [& args])
+
+#+END_SRC
+* 23_fluffy_clouds_noise_grid.clj 
+** namespaced with processing
+#+BEGIN_SRC clojure :results silent :show-process t
+  ;; (ns quil-sketches.gen-art.23-fluffy-clouds-noise-grid
+  ;;   (:require [quil.core :refer :all]
+  ;;             [quil.helpers.seqs :refer [range-incl]]
+  ;;             [quil.helpers.calc :refer [mul-add]]))
+  -
+
+  ;; Example 23 - Fluffy Clouds 2D Noise Grid
+  ;; Taken from Section 5.1.2, p88 (figure 5.4)
+
+  ;; float xstart, xnoise, ynoise;
+
+  ;; void setup() {
+  ;;   size(300, 300);
+  ;;   smooth();
+  ;;   background(0);
+  ;;   xstart = random(10);
+  ;;   xnoise = xstart;
+  ;;   ynoise = random(10);
+  ;;   for(int y = 0; y <= height; y+=5) {
+  ;;     ynoise += 0.1;
+  ;;     xnoise = xstart;
+  ;;     for(int x = 0; x <= width; x+=5) {
+  ;;       xnoise += 0.1;
+  ;;       drawPoint(x, y, noise(xnoise, ynoise));
+  ;;     }
+  ;;   }
+  ;; }
+
+  ;; void drawPoint(float x, float y, float noiseFactor) {
+  ;;   pushMatrix();
+  ;;   translate(x,y);
+  ;;   rotate(noiseFactor * radians(540));
+  ;;   float edgeSize = noiseFactor * 35;
+  ;;   float grey = 150 + (noiseFactor * 120);
+  ;;   float alph = 150 + (noiseFactor * 120);
+  ;;   noStroke();
+  ;;   fill(grey, alph);
+  ;;   ellipse(0,0, edgeSize, edgeSize/2);
+  ;;   popMatrix();
+  ;; }
+
+#+end_src
+** one block
+#+BEGIN_SRC clojure :results silent :show-process t
+  (defn draw-point
+    [x y noise-factor]
+    (q/push-matrix)
+    (q/translate x y)
+    (q/rotate (* noise-factor (q/radians 540)))
+    (let [edge-size (* noise-factor 35)
+	  grey (c/mul-add noise-factor 120 150)
+	  alph (c/mul-add noise-factor 120 150)]
+      (q/no-stroke)
+      (q/fill grey alph)
+      (q/ellipse 0 0 edge-size (/ edge-size 2))
+      (q/pop-matrix)))
+
+  (defn draw-all-points
+    [x-start y-start]
+    (dorun
+     (for [y (s/range-incl 0 (q/height) 5)
+	   x (s/range-incl 0 (q/width) 5)]
+       (let [x-noise (c/mul-add x 0.01 x-start)
+	     y-noise (c/mul-add y 0.01 y-start)]
+	 (draw-point x y (q/noise x-noise y-noise))))))
+
+  (defn setup []
+    (q/smooth)
+    (q/background 0)
+    (draw-all-points (q/random 10) (q/random 10)))
+
+  (q/defsketch gen-art-23
+    :title "Fluffy Clouds 2D Noise Grid"
+    :setup setup
+    :size [300 300])
+
+  ;; (defn -main [& args])
+
+#+END_SRC
+* 24_animated_fluffy_clouds.clj 
+** namespaced with processing
+#+BEGIN_SRC clojure :results silent :show-process t
+  ;; (ns quil-sketches.gen-art.24-animated-fluffy-clouds
+  ;;   (:require [quil.core :refer :all]
+  ;;             [quil.helpers.seqs :refer [steps seq->stream range-incl tap]]
+  ;;             [quil.helpers.calc :refer [mul-add]]))
+
+  ;; Example 24 - Animated Fluffy Clouds
+  ;; Taken from Listing 5.3, p89
+
+  ;; float xstart, xnoise, ystart, ynoise;
+
+  ;; void setup() {
+  ;;   size(300, 300);
+  ;;   smooth();
+  ;;   background(0);
+  ;;   frameRate(24);
+
+  ;;   xstart = random(10);
+  ;;   ystart = random(10);
+  ;; }
+
+  ;; void draw() {
+  ;;   background(0);
+
+  ;;   xstart += 0.01;
+  ;;   ystart += 0.01;
+
+  ;;   xnoise = xstart;
+  ;;   ynoise = ystart;
+
+  ;;   for(int y = 0; y <= height; y+=5){
+  ;;     ynoise += 0.1;
+  ;;     xnoise = xstart;
+  ;;     for(int x = 0; x <= width; x+= 5){
+  ;;       xnoise += 0.1;
+  ;;       drawPoint(x, y, noise(xnoise, ynoise));
+  ;;     }
+  ;;   }
+  ;; }
+
+  ;; void drawPoint(float x, float y, float noiseFactor) {
+  ;;   pushMatrix();
+  ;;   translate(x, y);
+  ;;   rotate(noiseFactor * radians(540));
+  ;;   noStroke();
+  ;;   float edgeSize = noiseFactor * 35;
+  ;;   float grey = 150 + (noiseFactor * 120);
+  ;;   float alph = 150 + (noiseFactor * 120);
+  ;;   fill(grey, alph);
+  ;;   ellipse(0, 0, edgeSize, edgeSize/2);
+  ;;   popMatrix();
+  ;; }
+
+#+end_src
+** one block
+#+BEGIN_SRC clojure :results silent :show-process t
+  (defn draw-point
+    [x y noise-factor]
+    (q/push-matrix)
+    (q/translate x y)
+    (q/rotate (* noise-factor (q/radians 540)))
+    (let [edge-size (* noise-factor 35)
+	  grey (c/mul-add noise-factor 120 150)
+	  alph (c/mul-add noise-factor 120 150)]
+      (q/no-stroke)
+      (q/fill grey alph)
+      (q/ellipse 0 0 edge-size (/ edge-size 2))
+      (q/pop-matrix)))
+
+  (defn draw-all-points [x-start y-start]
+    (let [step-size 5
+	  x-idxs    (s/range-incl 0 (/ (q/width) step-size))
+	  y-idxs    (s/range-incl 0 (/ (q/height) step-size))]
+      (doseq [x-idx x-idxs
+	      y-idx y-idxs]
+	(let [x       (* step-size x-idx)
+	      y       (* step-size y-idx)
+	      x-noise (c/mul-add x-idx 0.1 x-start)
+	      y-noise (c/mul-add y-idx 0.1 y-start)]
+	  (draw-point x y (q/noise x-noise y-noise))))))
+
+
+  (defn draw []
+    (q/background 0)
+    (let [starts-str        (q/state :starts-str)
+	  [x-start y-start] (starts-str)]
+      (draw-all-points x-start y-start)))
+
+  (defn setup []
+    (q/smooth)
+    (q/background 0)
+    (q/frame-rate 24)
+
+    (let [x-starts (s/steps (q/random 10) 0.01)
+	  y-starts (s/steps (q/random 10) 0.01)
+	  starts   (map list x-starts y-starts)
+	  starts-str (s/seq->stream starts)]
+
+      (q/set-state! :starts-str starts-str))) ;; establish the state--a map from which you extract a name of a function
+
+  (q/defsketch gen-art-24
+    :title "Animated Fluffy Clouds"
+    :setup setup
+    :draw draw
+    :middleware [m/pause-on-error]
+    :size [300 300])
+
+  ;; (defn -main [& args])
+
+#+END_SRC
+* 25_animated_rotated_lines.clj 
+** namespaced with processing
+#+BEGIN_SRC clojure :results silent :show-process t
+  ;; (ns quil-sketches.gen-art.25-animated-rotated-lines
+  ;;   (:require [quil.core :refer :all]
+  ;;             [quil.helpers.seqs :refer [steps seq->stream range-incl tap tally indexed-range-incl]]
+  ;;             [quil.helpers.calc :refer [mul-add]]))
+
+  ;; Example 25 - Animated Rotated Lines
+  ;; Taken from Listing 5.4, p91
+
+  ;; float xstart, xnoise, ystart, ynoise;
+  ;; float xstartNoise, ystartNoise;
+
+  ;; void setup() {
+  ;;   size(300, 300);
+  ;;   smooth();
+  ;;   background(255);
+  ;;   frameRate(24);
+
+  ;;   xstartNoise = random(20);
+  ;;   ystartNoise = random(20);
+
+  ;;   xstart = random(10);
+  ;;   ystart = random(10);
+  ;; }
+
+  ;; void draw() {
+  ;;   background(255);
+
+  ;;   xstart += 0.01;
+  ;;   ystart += 0.01;
+
+  ;;   xstartNoise += 0.01;
+  ;;   ystartNoise += 0.01;
+  ;;   xstart += (noise(xstartNoise) * 0.5) - 0.25;
+  ;;   ystart += (noise(ystartNoise) * 0.5) - 0.25;
+
+  ;;   xnoise = xstart;
+  ;;   ynoise = ystart;
+
+  ;;   for(int y = 0; y <= height; y+=5){
+  ;;     ynoise += 0.1;
+
+  ;;     xnoise = xstart;
+  ;;     for(int x = 0; x <= width; x+= 5){
+  ;;       xnoise += 0.1;
+  ;;       drawPoint(x, y, noise(xnoise, ynoise));
+  ;;     }
+  ;;   }
+  ;; }
+
+  ;; void drawPoint(float x, float y, float noiseFactor) {
+  ;;   pushMatrix();
+  ;;   translate(x, y);
+  ;;   rotate(noiseFactor * radians(360));
+  ;;   stroke(0, 150);
+  ;;   line(0, 0, 20, 0);
+  ;;   popMatrix();
+  ;; }
+
+#+end_src
+** one block
+#+BEGIN_SRC clojure :results silent :show-process t
+  (defn draw-point
+    [x y noise-factor]
+    (q/push-matrix)
+    (q/translate x y)
+    (q/rotate (* noise-factor (q/radians 360)))
+    (q/stroke 0 150)
+    (q/line 0 0 20 0)
+    (q/pop-matrix))
+
+  (defn draw-all-points
+    [x-start y-start step-size]
+    (dorun
+     (for [[x-idx x] (s/indexed-range-incl 0 (q/width) step-size)
+	   [y-idx y] (s/indexed-range-incl 0 (q/height) step-size)]
+       (let [x-noise-shift (* x-idx 0.1)
+	     y-noise-shift (* y-idx 0.1)
+	     x-noise (+ x-start x-noise-shift)
+	     y-noise (+ y-start y-noise-shift)]
+	 (draw-point x y (q/noise x-noise y-noise))))))
+
+  (defn starts-seq []
+    (let [noise-steps (s/steps (q/random 20) 0.01)
+	  noises      (map q/noise noise-steps)
+	  noises      (c/mul-add noises 0.5 -0.25)
+	  noise-tally (s/tally noises)]
+      (map +
+	   (s/steps (q/random 10) 0.01)
+	   noise-tally)))
+
+  (defn setup []
+    (q/smooth)
+    (q/background 255)
+    (q/frame-rate 24)
+
+    (let [x-starts      (starts-seq)
+	  y-starts      (starts-seq)
+	  starts-str    (s/seq->stream (map list x-starts y-starts))]
+      (q/set-state! :starts-str starts-str)))
+
+  (defn draw []
+    (q/background 255)
+    (let [[x-start y-start] ((q/state :starts-str))]
+      (draw-all-points x-start y-start 5)))
+
+  (q/defsketch gen-art-25
+    :title "Animated Rotated Lines"
+    :setup setup
+    :draw draw
+    :middleware [m/pause-on-error]
+    :size [300 300])
+
+  ;; (defn -main [& args])
+
+#+END_SRC
+* 26_sphere.clj 
+** namespaced with processing
+#+BEGIN_SRC clojure :results silent :show-process t
+  ;; (ns quil-sketches.gen-art.26-sphere
+  ;;   (:require [quil.core :refer :all]))
+
+  ;; Example 26 - 3D Sphere
+  ;; Taken from Section 5.3.1, p94
+
+  ;; import processing.opengl.*;
+
+  ;; void setup() {
+  ;;   size(500, 300, OPENGL);
+  ;;   sphereDetail(40);
+
+  ;;   translate(q/width/2, height/2.0);
+  ;;   sphere(100);
+  ;; }
+
+#+end_src
+** one block
+#+BEGIN_SRC clojure :results silent :show-process t
+  (defn setup []
+    (q/smooth)
+    (q/sphere-detail 100)
+    (q/translate (/ (q/width) 2) (/ (q/height) 2) 0)
+    (q/sphere 100))
+
+  (q/defsketch gen-art-26
+    :title "3D Sphere"
+    :setup setup
+    :size [500 300]
+    :renderer :opengl)
+
+  ;; (defn -main [& args])
+
+#+END_SRC
+* 27_noise_perspective.clj 
+** namespaced with processing
+#+BEGIN_SRC clojure :results silent :show-process t
+  ;; (ns quil-sketches.gen-art.27-noise-perspective
+  ;;   (:require [quil.core :refer :all]
+  ;;             [quil.helpers.seqs :refer [indexed-range-incl seq->stream steps]]
+  ;;             [quil.helpers.calc :refer [mul-add]]))
+
+  ;; Example 27 - 2D Noise from a 3D Perspectivea
+  ;; Taken from Listing 5.5, p95
+
+  ;; import processing.opengl.*;
+
+  ;; float xstart, xnoise, ystart, ynoise;
+
+  ;; void setup() {
+  ;;   size(500, 300, OPENGL);
+  ;;   background(0);
+  ;;   sphereDetail(8);
+  ;;   noStroke();
+
+  ;;   xstart = random(10);
+  ;;   ystart = random(10);
+  ;; }
+
+  ;; void draw() {
+  ;;   background(0);
+  ;;   xstart += 0.01;
+  ;;   ystart += 0.01;
+
+  ;;   xnoise = xstart;
+  ;;   ynoise = ystart;
+
+  ;;   for(int y = 0; y <= height; y+=5){
+  ;;     ynoise += 0.1;
+  ;;     xnoise = xstart;
+  ;;     for(int x = 0; x <= width; x += 5){
+  ;;       xnoise += 0.1;
+  ;;       drawPoint(x, y, noise(xnoise, ynoise));
+  ;;     }
+  ;;   }
+  ;; }
+
+  ;; void drawPoint(float x, float y, float noiseFactor){
+  ;;   pushMatrix();
+  ;;   translate(x, 250 - y, -y);
+  ;;   float sphereSize = noiseFactor * 35;
+  ;;   float grey = 150 + (noiseFactor * 120);
+  ;;   float alph = 150 + (noiseFactor * 120);
+  ;;   fill(grey, alph);
+  ;;   sphere(sphereSize);
+  ;;   popMatrix();
+  ;; }
+
+
+#+end_src
+** one block
+#+BEGIN_SRC clojure :results silent :show-process t
+  (defn draw-point
+    [x y noise-factor]
+    (q/push-matrix)
+    (q/translate x (- 250 y) (* -1 y))
+    (let [sphere-size (* noise-factor 35)
+	  grey        (c/mul-add noise-factor 120 150)
+	  alph        grey]
+      (q/fill grey alph)
+      (q/sphere sphere-size)
+      (q/pop-matrix)))
+
+  (defn draw []
+    (q/background 0)
+    (let [[x-shift y-shift] ((q/state :shifts))]
+      (doseq [[x-idx x] (s/indexed-range-incl 0 (q/width) 5)
+	      [y-idx y] (s/indexed-range-incl 0 (q/height) 5)]
+	(let [y-noise (c/mul-add y-idx 0.1 y-shift)
+	      x-noise (c/mul-add x-idx 0.1 x-shift)]
+	  (draw-point x y (q/noise x-noise y-noise))))))
+
+  (defn setup []
+    (q/smooth)
+    (q/background 0)
+
+    (q/sphere-detail 8)
+    (q/no-stroke)
+    (let [x-shifts (s/steps (q/random 10) 0.01)
+	  y-shifts (s/steps (q/random 10) 0.01)
+	  shifts   (map list x-shifts y-shifts)]
+      (q/set-state! :shifts (s/seq->stream shifts))))
+
+  (q/defsketch gen-art-27
+    :title "2D Noise from a 3D Perspective"
+    :setup setup
+    :draw draw
+    :size [500 300]
+    :middleware [m/pause-on-error]
+    :renderer :opengl)
+
+  ;; (defn -main [& args])
+
+#+END_SRC
+* 28_cloud_cube.clj 
+** namespaced with processing
+#+BEGIN_SRC clojure :results silent :show-process t
+  ;; (ns quil-sketches.gen-art.28-cloud-cube
+  ;;   (:require [quil.core :refer :all]
+  ;;             [quil.helpers.seqs :refer [indexed-range-incl]]
+  ;;             [quil.helpers.calc :refer [mul-add]]))
+
+  ;; Example 28 - A Cube of 3D Noise
+  ;; Taken from Listing 5.6, p97
+
+  ;; float xstart, ystart, zstart;
+  ;; float xnoise, ynoise, znoise;
+
+  ;; int sideLength = 200;
+  ;; int spacing = 5;
+
+  ;; void setup() {
+  ;;   size(500, 300, P3D);
+  ;;   background(0);
+  ;;   noStroke();
+
+  ;;   xstart = random(10);
+  ;;   ystart = random(10);
+  ;;   zstart = random(10);
+  ;; }
+
+  ;; void draw() {
+  ;;   background(0);
+
+  ;;   xstart += 0.01;
+  ;;   ystart += 0.01;
+  ;;   zstart += 0.01;
+
+  ;;   xnoise = xstart;
+  ;;   ynoise = ystart;
+  ;;   znoise = zstart;
+
+  ;;   translate(150, 20, -150);
+  ;;   rotateZ(q/frameCount * 0.1);
+  ;;   rotateY(q/frameCount * 0.1);
+
+  ;;   for(int z = 0; z <= sideLength; z+= spacing){
+  ;;     znoise += 0.1;
+  ;;     ynoise = ystart;
+  ;;     for(int y = 0; y <= sideLength; y+= spacing){
+  ;;       ynoise += 0.1;
+  ;;       xnoise = xstart;
+  ;;       for(int x = 0; x <= sideLength; x+= spacing){
+  ;;         xnoise += 0.1;
+  ;;         drawPoint(x, y, z, noise(xnoise, ynoise, znoise));
+  ;;       }
+  ;;     }
+  ;;   }
+  ;; }
+
+  ;; void drawPoint(float x, float y, float z, float noiseFactor){
+  ;;   pushMatrix();
+  ;;   translate(x, y, z);
+  ;;   float grey = noiseFactor * 255;
+  ;;   fill(grey, 10);
+  ;;   box(spacing, spacing, spacing);
+  ;;   popMatrix();
+  ;; }
+
+#+end_src
+** one block
+#+BEGIN_SRC clojure :results silent :show-process t
+  (def side-length 200)
+  (def spacing 5)
+
+  (defn draw-point
+    [x y z noise-factor]
+    (q/push-matrix)
+    (q/translate x y z)
+    (let [grey (* noise-factor 255)]
+      (q/fill grey 10)
+      (q/box spacing spacing spacing)
+      (q/pop-matrix)))
+
+  (defn draw []
+    (q/background 0)
+
+    (let [fc          (q/frame-count)
+	  x-start     (q/state :x-start)
+	  y-start     (q/state :y-start)
+	  z-start     (q/state :z-start)
+	  rotate-val  (* fc 0.1)
+	  noise-shift (* fc 0.01)]
+
+      (q/translate 150 20 -150)
+      (q/rotate-z rotate-val)
+      (q/rotate-y rotate-val)
+      (doseq [[x-idx z] (s/indexed-range-incl 0 side-length spacing)
+	      [y-idx y] (s/indexed-range-incl 0 side-length spacing)
+	      [z-idx x] (s/indexed-range-incl 0 side-length spacing)]
+	(let [x-noise (c/mul-add x-idx 0.1 (+ noise-shift x-start))
+	      y-noise (c/mul-add y-idx 0.1 (+ noise-shift y-start))
+	      z-noise (c/mul-add z-idx 0.1 (+ noise-shift z-start))]
+	  (draw-point x y z (q/noise x-noise y-noise z-noise))))))
+
+  (defn setup []
+    (q/background 0)
+    (q/no-stroke)
+    (q/set-state! :x-start (q/random 10)
+		:y-start (q/random 10)
+		:z-start (q/random 10)))
+
+  (q/defsketch gen-art-28
+    :title "A Cube of 3D Noise"
+    :setup setup
+    :draw draw
+    :middleware [m/pause-on-error]
+    :size [500 300]
+    :renderer :p3d)
+
+  ;; (defn -main [& args])
+
+#+END_SRC
+* 29_spiral_sphere.clj 
+** namespaced with processing
+#+BEGIN_SRC clojure :results silent :show-process t
+  ;; (ns quil-sketches.gen-art.29-spiral-sphere
+  ;;   (:require [quil.core :refer :all]
+  ;;             [quil.helpers.drawing :refer [line-join-points]]
+  ;;             [quil.helpers.calc :refer [mul-add]]))
+
+  ;; Example 29 - Spiral Sphere
+  ;; Taken from Listing 5.7, p100
+
+  ;; import processing.opengl.*;
+
+  ;; int radius = 100;
+
+  ;; void setup() {
+  ;;   size(500, 300, OPENGL);
+  ;;   background(255);
+  ;;   stroke(0);
+  ;; }
+
+  ;; void draw() {
+  ;;   background(255);
+
+  ;;   translate(q/width/2, height/2, 0);
+  ;;   rotateY(q/frameCount * 0.03);
+  ;;   rotateX(q/frameCount * 0.04);
+
+  ;;   float s = 0;
+  ;;   float t = 0;
+  ;;   float lastx = 0;
+  ;;   float lasty = 0;
+  ;;   float lastz = 0;
+
+  ;;   while(t < 180) {
+  ;;     s+= 18;
+  ;;     t+= 1;
+  ;;     float radianS = radians(s);
+  ;;     float radianT = radians(t);
+
+  ;;     float thisx = 0 + (radius * cos(radianS) * sin(radianT));
+  ;;     float thisy = 0 + (radius * sin(radianS) * sin(radianT));
+  ;;     float thisz = 0 + (radius * cos(radianT));
+
+  ;;     if (lastx != 0){
+  ;;       line(thisx, thisy, thisz, lastx, lasty, lastz);
+  ;;     }
+
+  ;;     lastx = thisx;
+  ;;     lasty = thisy;
+  ;;     lastz = thisz;
+  ;;   }
+  ;; }
+
+#+end_src
+** one block
+#+BEGIN_SRC clojure :results silent :show-process t
+  (def radius 100)
+
+  (defn setup []
+    (q/background 255)
+    (q/stroke 00))
+
+  (defn draw []
+    (q/background 255)
+    (q/translate (/ (q/width) 2) (/ (q/height) 2) 0)
+    (q/rotate-y (* (q/frame-count) 0.03))
+    (q/rotate-x (* (q/frame-count) 0.04))
+    (let [line-args (for [t (range 0 180)]
+		      (let [s        (* t 18)
+			    radian-s (q/radians s)
+			    radian-t (q/radians t)
+			    x (* radius  (q/cos radian-s) (q/sin radian-t))
+			    y (* radius  (q/sin radian-s) (q/sin radian-t))
+			    z (* radius (q/cos radian-t))]
+			[x y z]))]
+      (dorun
+       (map #(apply q/line %) (d/line-join-points line-args)))))
+
+
+  (q/defsketch gen-art-29
+    :title "Spiral Sphere"
+    :setup setup
+    :draw draw
+    :middleware [m/pause-on-error]
+    :size [500 300]
+    :renderer :opengl)
+
+  ;; (defn -main [& args])
+
+#+END_SRC
+* 30_random_clicked_circles.clj
+** namespaced with processing
+#+BEGIN_SRC clojure :results silent :show-process t
+  ;; (ns quil-sketches.gen-art.30-random-clicked-circles
+  ;;   (:require [quil.core :refer :all]))
+
+  ;; Example 30 - Random Clicked Circles
+  ;; Taken from Listing 6.1, p113
+
+  ;; int _num = 10;
+
+  ;; void setup() {
+  ;;   size(500, 300);
+  ;;   background(255);
+  ;;   smooth();
+  ;;   strokeWeight(1);
+  ;;   fill(150, 50);
+  ;;   drawCircles();
+  ;; }
+
+  ;; void draw() {
+  ;; }
+
+  ;; void mouseReleased() {
+  ;;   drawCircles();
+  ;; }
+
+  ;; void drawCircles() {
+  ;;   for(int i = 0; i < _num; i++) {
+  ;;     float x = random(q/width);
+  ;;     float y = random(q/height);
+  ;;     float radius = random(100) + 10;
+  ;;     noStroke();
+  ;;     ellipse(x, y, radius * 2, radius * 2);
+  ;;     stroke(0, 150);
+  ;;     ellipse(x, y, 10, 10);
+  ;;   }
+  ;; }
+
+#+end_src
+** one block
+#+BEGIN_SRC clojure :results silent :show-process t
+  (def num 10)
+
+  (defn draw-circles []
+    (dorun
+     (for [i (range 0 num)]
+       (let [x      (q/random (q/width))
+	     y      (q/random (q/height))
+	     radius (+ (q/random 100) 10)]
+	 (q/no-stroke)
+	 (q/ellipse x y (* 2 radius) (* 2 radius))
+	 (q/stroke 0 150)
+	 (q/ellipse x y 10 10)))))
+
+  (defn setup []
+    (q/background 255)
+    (q/smooth)
+    (q/stroke-weight 1)
+    (q/fill 150 50)
+    (draw-circles))
+
+  (q/defsketch gen-art-30
+    :title "Random Clicked Circles"
+    :setup setup
+    :mouse-released draw-circles
+    :size [500 300])
+
+  ;; (defn -main [& args])
+
+#+END_SRC
+* 31_oo_circles.clj
+** namespaced with processing
+#+BEGIN_SRC clojure :results silent :show-process t
+  ;; (ns quil-sketches.gen-art.31-oo_circles
+  ;;   (:require [quil.core :refer :all]
+  ;;             [quil.helpers.calc :refer [mod-range]]))
+
+  ;; Example 31 - OO Circles
+  ;; Taken from Listing 6.4, p117
+
+  ;; int _num = 10;
+  ;; Circle[] _circleArr = {};
+
+  ;; void setup() {
+  ;;   size(500, 300);
+  ;;   background(255);
+  ;;   smooth();
+  ;;   strokeWeight(1);
+  ;;   fill(150, 50);
+  ;;   drawCircles();
+  ;; }
+
+  ;; void draw() {
+  ;;   background(255);
+  ;;   for(int i = 0; i < _circleArr.length; i++) {
+  ;;     Circle thisCirc = _circleArr[i];
+  ;;     thisCirc.updateMe();
+  ;;   }
+  ;; }
+
+  ;; void mouseReleased() {
+  ;;   drawCircles();
+  ;; }
+
+  ;; void drawCircles() {
+  ;;   for(int i = 0; i < _num; i++) {
+  ;;     Circle thisCirc = new Circle();
+  ;;     thisCirc.drawMe();
+  ;;     _circleArr = (Circle[])append(_circleArr, thisCirc);
+  ;;   }
+  ;; }
+
+  ;; //=========== objects
+
+  ;; class Circle {
+  ;;   float x, y;
+  ;;   float radius;
+  ;;   color linecol, fillcol;
+  ;;   float alph;
+  ;;   float xmove, ymove;
+
+  ;;   Circle() {
+  ;;     x = random(q/width);
+  ;;     y = random(q/height);
+  ;;     radius = random(100) + 10;
+  ;;     linecol = color(random(255), random(255), random(255));
+  ;;     fillcol = color(random(255), random(255), random(255));
+  ;;     alph = random(255);
+  ;;     xmove = random(10) - 5;
+  ;;     ymove = random(10) - 5;
+  ;;   }
+
+  ;;   void drawMe() {
+  ;;     noStroke();
+  ;;     fill(q/fillcol, alph);
+  ;;     ellipse(x, y, radius*2, radius*2);
+  ;;     stroke(linecol, 150);
+  ;;     noFill();
+  ;;     ellipse(x, y, 10, 10);
+  ;;   }
+
+  ;;   void updateMe() {
+  ;;     x += xmove;
+  ;;     y += ymove;
+  ;;     if(x > (q/width + radius)) {x = 0 - radius;}
+  ;;     if(x < (0 - radius)) {x = width + radius;}
+  ;;     if(y > (q/height + radius)) {y = 0 - radius;}
+  ;;     if(y < (0 - radius)) {y = height + radius;}
+  ;;     drawMe();
+  ;;   }
+  ;; }
+
+#+end_src
+** one block
+#+BEGIN_SRC clojure :results silent :show-process t
+  (def num 10)
+
+  (defn mk-circle []
+    {:x        (q/random (q/width))
+     :y        (q/random (q/height))
+     :radius   (+ 10 (q/random 100))
+     :line-col (q/color (q/random 255) (q/random 255) (q/random 255))
+     :fill-col (q/color (q/random 255) (q/random 255) (q/random 255))
+     :alph     (q/random 255)
+     :xmove    (- (q/random 10) 5)
+     :ymove    (- (q/random 10) 5)})
+
+  (defn add-circles
+    [circles*]
+    (dotimes [_ num]
+      (let [c (mk-circle)]
+	(swap! circles* conj c))))
+
+  (defn mouse-released
+    []
+    (add-circles (q/state :circles)))
+
+  (defn setup []
+    (q/background 255)
+    (q/smooth)
+    (q/stroke-weight 1)
+    (q/fill-int 150 50)
+    (let [circles* (atom [])]
+      (add-circles circles*)
+      (q/set-state! :circles circles*)))
+
+  (defn update-circle
+    [{:keys [x y xmove ymove radius] :as circle}]
+
+    (let [new-x (+ x xmove)
+	  new-x (if (< new-x (- 0 radius)) (+ (q/width) radius) new-x)
+	  new-x (if (> new-x (+ (q/width) radius)) (- 0 radius) new-x)
+	  new-y (+ y ymove)
+	  new-y (if (< new-y (- 0 radius)) (+ (q/height) radius) new-y)
+	  new-y (if (> new-y (+ (q/height) radius)) (- 0 radius) new-y)]
+      (assoc circle :x new-x :y new-y)))
+
+  (defn update-circles
+    [circles]
+    (map update-circle circles))
+
+  (defn draw-circle
+    [{:keys [x y radius line-col fill-col alph]}]
+    (q/no-stroke)
+    (q/fill-int fill-col alph)
+    (q/ellipse x y (* 2 radius) (* 2 radius))
+    (q/stroke-int line-col 150)
+    (q/no-fill)
+    (q/ellipse x y 10 10))
+
+  (defn draw []
+    (q/background 255)
+    (let [circles* (q/state :circles)
+	  circles (swap! circles* update-circles)]
+      (doseq [c circles]
+	(draw-circle c))))
+
+  (q/defsketch gen-art-31
+    :title "OO Circles"
+    :setup setup
+    :draw draw
+    :middleware [m/pause-on-error]
+    :mouse-released mouse-released
+    :size [500 300])
+
+  ;; (defn -main [& args])
+
+#+END_SRC
+* Generative Art - Quil Translations
+
+Key examples from the book Generative Art by Matt Pearson translated from Processing into Quil, reprinted with kind permission from the author.
+
+## 1. Cross with Circle
+![Cross with Circle](http://cloud.github.com/downloads/quil/quil/gen-art-cross-with-circle.png)
+
+[View Source](01_cross_with_circle.clj)
+(p20 - Section 2.2.1)
+
+## 2. Growing Circle
+![Growing Circle](http://cloud.github.com/downloads/quil/quil/gen-art-growing-circle.png)
+
+[View Source](02_growing_circle.clj)
+(p28 - Listing 2.1)
+
+## 3. Concentric circles drawn using traces
+![Concentric Circles](http://cloud.github.com/downloads/quil/quil/gen-art-concentric-circles.png)
+
+[View Source](03_concentric_circles.clj)
+(p37 - Listing 2.3)
+
+## 4. Fading Horizontal Lines
+![Fading Horizontal Lines](http://cloud.github.com/downloads/quil/quil/gen-art-fading-horizontal-lines.png)
+
+[View Source](04_fading_horizontal_lines.clj)
+(p39 - Section 2.4.3)
+
+## 5. Random Scribble
+![Random Scribble](http://cloud.github.com/downloads/quil/quil/gen-art-random-scribble.png)
+
+[View Source](05_random_scribble.clj)
+(p55 - Section 3.2)
+
+## 6. Random Walk Scribble
+![Random Walk Scribble](http://cloud.github.com/downloads/quil/quil/gen-art-rand-walk-scribble.jpg)
+
+[View Source](06_rand_walk_scribble.clj)
+(p56 - Section 3.2(b))
+
+## 7. Perlin Noise Scribble
+![Random Walk Scribble](http://cloud.github.com/downloads/quil/quil/gen-art-perlin-noise-scribble.jpg)
+
+[View Source](07_perlin_noise_scribble.clj)
+(p59 - Listing 3.1)
+
+## 8. Sine Wave
+![Sine Wave](http://cloud.github.com/downloads/quil/quil/gen-art-sine-wave.jpg)
+
+[View Source](08_sine_wave.clj)
+(p60 - Listing 3.2)
+
+## 9. Sine Wave with Noise
+![Sine Wave with Noise](http://cloud.github.com/downloads/quil/quil/gen-art-sine-wave-with-noise.jpg)
+
+[View Source](09_sine_wave_with_noise.clj)
+(p63 - Section 3.3.2)
+
+## 10. Custom Random Function
+![Custom Random Function](http://cloud.github.com/downloads/quil/quil/gen-art-custom-random-function.jpg)
+
+[View Source](10_custom_rand.clj)
+(p63 - Section 3.3.3)
+
+## 11. Dotted Circle
+![Dotted Circle](http://cloud.github.com/downloads/quil/quil/gen-art-dotted-circle.jpg)
+
+[View Source](11_dotted_circle.clj)
+(p68 - Listing 4.1)
+
+## 12. Spiral
+![Spiral](http://cloud.github.com/downloads/quil/quil/gen-art-spiral.jpg)
+
+[View Source](12_spiral.clj)
+(p69 - Listing 4.2)
+
+## 13. Noisy Spiral
+![Noisy Spiral](http://cloud.github.com/downloads/quil/quil/gen-art-noisy-spiral.jpg)
+
+[View Source](13_noisy_spiral.clj)
+(p69 - Listing 4.3)
+
+## 14. 100 Noisy Spirals
+![100 Noisy Spirals](http://cloud.github.com/downloads/quil/quil/gen-art-hundred-noisy-spirals.jpg)
+
+[View Source](14_hundred_noisy_spirals.clj)
+(p71 - Listing 4.4)
+
+## 15. Custom Noise Circle
+![Custom Noise Circle](http://cloud.github.com/downloads/quil/quil/gen-art-custom-noise-circle.jpg)
+
+[View Source](15_custom_noise_circle.clj)
+(p73 - Listing 4.5)
+
+## 16. Circle from Opposing Lines
+![Circle from Opposing Lines](https://cloud.githubusercontent.com/assets/252053/3864369/1ecd04c8-1f5b-11e4-9762-ae495838c9f2.jpg)
+
+[View Source](16_circle_from_opposing_lines.clj)
+(p76 - Section 4.2)
+
+## 17. Circle from Fading Opposing Lines
+![Circle from Fading Opposing Lines](https://cloud.githubusercontent.com/assets/252053/3864371/45de74fc-1f5b-11e4-9e31-bc6688dd83c0.jpg)
+
+[View Source](17_circle_from_fading_opposing_lines.clj)
+(p79 - Section 4.2 - Figure 4.12)
+
+## 18. Warped Circle from Fading Opposing Lines
+![Warped Circle from Fading Opposing Lines](https://cloud.githubusercontent.com/assets/252053/3864375/604717ae-1f5b-11e4-95c4-b4a1b9c1d034.jpg)
+
+[View Source](18_warped_circle_from_fading_opposing_lines.clj)
+(p79 - Section 4.2 - Figure 4.1)
+
+## 19. Wave Clock
+![Wave Clock](https://cloud.githubusercontent.com/assets/252053/3864376/754381ce-1f5b-11e4-89b5-ebbc05df58be.jpg)
+
+[View Source](19_wave_clock.clj)
+(p79 - Listing 4.6)
+
+## 20. 2D Noise Grid
+![2D Noise Grid](https://cloud.githubusercontent.com/assets/252053/3864382/90fc3dde-1f5b-11e4-8c05-e0817dc115c6.png)
+
+[View Source](20_noise_grid.clj)
+(p84 - Listing 5.1)
+
+## 21. Squared 2D Noise Grid
+![Squared 2D Noise Grid](https://cloud.githubusercontent.com/assets/252053/3864387/a0fa3f9c-1f5b-11e4-84ad-25476acb8177.png)
+
+[View Source](21_squared_noise_grid.clj)
+(p86 - Listing 5.2)
+
+## 22. Rotating Lines 2D Noise Grid
+![Rotating Lines 2D Noise Grid](https://cloud.githubusercontent.com/assets/252053/3864392/b3471d96-1f5b-11e4-998c-eda85ddce415.png)
+
+[View Source](22_rotating_lines_noise_grid.clj)
+(p86 - Section 5.12 - Figure 5.3)
+
+## 23. Fluffy Clouds 2D Noise Grid
+![Fluffy Clouds 2D Noise Grid](https://cloud.githubusercontent.com/assets/252053/3864394/c5f665a0-1f5b-11e4-894c-2be1730ff41b.png)
+
+[View Source](23_fluffy_clouds_noise_grid.clj)
+(p88 - Section 5.12 - Figure 5.4)
+
+## 24. Animated Fluffly Clouds
+![Animated Fluffly Clouds](https://cloud.githubusercontent.com/assets/252053/3864397/d6a9f1be-1f5b-11e4-8497-913e3a22f96f.png)
+
+[View Source](24_animated_fluffy_clouds.clj)
+(p91 - Listing 5.3)
+
+## 25. Animated Rotated Lines
+![Animated Rotated Lines](https://cloud.githubusercontent.com/assets/252053/3864402/ea276b90-1f5b-11e4-9352-e1c756fd0038.png)
+
+[View Source](25_animated_rotated_lines.clj)
+(p91 - Listing 5.4)
+Try setting the step-size to 15.
+
+## 26. 3D Sphere
+![3D Sphere](https://cloud.githubusercontent.com/assets/252053/3864406/0304ce3c-1f5c-11e4-8f17-d7a770336d4f.png)
+
+[View Source](26_sphere.clj)
+(p94 - Section 5..1 - Figure 5.5)
+
+## 27. Noise from a 3D Perspective
+![Noise from a 3D Perspective](https://cloud.githubusercontent.com/assets/252053/3864412/1236edcc-1f5c-11e4-9ee7-e62aafa5c941.png)
+
+[View Source](27_noise_perspective.clj)
+(p95 - Listing 5.5)
+
+## 28. A Cube of 3D Noise
+![A Cube of 3D Noise](https://cloud.githubusercontent.com/assets/252053/3864419/28667dba-1f5c-11e4-93df-d694db5e28ce.png)
+
+[View Source](28_cloud_cube.clj)
+(p97 - Listing 5.6)
+
+## 29. Spiral Sphere
+![Spiral Sphere](https://cloud.githubusercontent.com/assets/252053/3864420/36ce060c-1f5c-11e4-9a3f-0dc0df32ebcc.png)
+
+[View Source](29_spiral_sphere.clj)
+(p100 - Listing 5.7)
+
+## 30. Random Clicked Circles
+![Random Clicked Circles](https://cloud.githubusercontent.com/assets/252053/3864421/46e3cac2-1f5c-11e4-92ae-7884c0de363a.png)
+
+[View Source](30_random_clicked_circles.clj)
+(p113 - Listing 6.1)
+
+## 31. OO Circles
+![OO Circles](https://cloud.githubusercontent.com/assets/252053/3864422/57966cbc-1f5c-11e4-8bec-b5ce590f4bf5.png)
+
+[View Source](31_oo_circles.clj)
+(p117 - Listing 6.4)
